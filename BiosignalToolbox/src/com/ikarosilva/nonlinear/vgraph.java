@@ -20,8 +20,8 @@ public class vgraph {
 			tmp=new HashSet();
 			int cur_point=i;
 			int vis_point=i+1;
-			int df=0
-			while(  )
+			//int df=0
+			//while(  )
 			
 			
 		}
