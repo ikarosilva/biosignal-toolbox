@@ -9,27 +9,15 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.xy.VectorSeries;
-import org.jfree.data.xy.VectorSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 
-    /**
-    * An example showing how to plot a simple function in JFreeChart.  Because
-    * JFreeChart displays discrete data rather than plotting functions, you need
-    * to create a dataset by sampling the function values.
-    */
-    public class Function2DDemo1 extends ApplicationFrame {
+    public class PlottingDemo1 extends ApplicationFrame {
 
-        /**
-         * Creates a new demo.
-         *
-         * @param title  the frame title.
-         */
-        public Function2DDemo1(String title) {
+        public PlottingDemo1(String title) {
             super(title);
             JPanel chartPanel = createDemoPanel();
             chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
@@ -81,10 +69,10 @@ import org.jfree.ui.RefineryUtilities;
     				output=(double) a[n] - ((double)n)/2;
     			}
     			series.add(n, output);
-    			series2.add(n, generator.nextGaussian());
+    			series2.add(n, generator.nextGaussian()-output);
     		}
         	
-        	//result.addSeries(series);
+        	result.addSeries(series);
         	result.addSeries(series2);
             return result;
         }
@@ -106,7 +94,7 @@ import org.jfree.ui.RefineryUtilities;
          * @param args  ignored.
          */
         public static void main(String[] args) {
-            Function2DDemo1 demo = new Function2DDemo1(
+            PlottingDemo1 demo = new PlottingDemo1(
                     "Test");
             demo.pack();
             RefineryUtilities.centerFrameOnScreen(demo);
