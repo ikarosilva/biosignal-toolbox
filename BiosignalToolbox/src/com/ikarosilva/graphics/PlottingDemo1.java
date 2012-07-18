@@ -24,13 +24,7 @@ import org.jfree.ui.RefineryUtilities;
             setContentPane(chartPanel);
         }
        
-        /**
-         * Creates a chart.
-         *
-         * @param dataset  the dataset.
-         *
-         * @return A chart instance.
-         */
+      
         private static JFreeChart createChart(XYDataset dataset) {
             // create the chart...
             JFreeChart chart = ChartFactory.createXYLineChart(
