@@ -7,6 +7,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 import javax.swing.JPanel;
 
 import org.jfree.chart.ChartFactory;
@@ -54,13 +57,18 @@ import org.jfree.ui.RefineryUtilities;
         	XYSeries series = new XYSeries(1);
         	double Ts = 1;
         	byte[] data = readBinary("/home/ikaro/AudioPulseData.raw");
+        	short[] audioData = new short[data.length/2];//ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN).asShortBuffer().array()‌​; 
+        	ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN).asShortBuffer().get(audioData);
         	System.out.println("Reading data");
-        	for(int n=0;n<data.length;n++){
-    			series.add(n*Ts, data[n]);
+        	for(int n=0;n<audioData.length;n++){
+    			series.add(n*Ts, audioData[n]);
     			//System.out.println("Data is = " + data[n]);
     		}
         	result.addSeries(series);
             return result;
+            //TODO: 
+            //implment http://stackoverflow.com/questions/5625573/byte-array-to-short-array-and-back-again-in-java
+            // in client
         }
 
         public static byte[] readBinary(String aInputFileName){
