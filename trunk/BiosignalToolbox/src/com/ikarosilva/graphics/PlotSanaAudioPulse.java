@@ -60,9 +60,8 @@ public class PlotSanaAudioPulse extends ApplicationFrame {
 		double Ts = 1;
 		short[] data=null;
 		try {
-			data = readBinary2("/home/ikaro/AudioPulseDataRamp.raw");
+			data = readBinary2("/home/ikaro/oae_data/AP_1353247872.raw");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("Reading data");
@@ -72,9 +71,6 @@ public class PlotSanaAudioPulse extends ApplicationFrame {
 		}
 		result.addSeries(series);
 		return result;
-		//TODO: 
-		//implment http://stackoverflow.com/questions/5625573/byte-array-to-short-array-and-back-again-in-java
-		// in client
 	}
 
 	public static short[] readBinary2(String aInputFileName) throws IOException{
@@ -111,47 +107,6 @@ public class PlotSanaAudioPulse extends ApplicationFrame {
 	}
 	
 	
-	public static short[] readBinary(String aInputFileName){
-
-		File file = new File(aInputFileName);
-		byte[] result = new byte[(int)file.length()];
-		short[] data = new short[result.length/2];
-		int dataIndex=0;
-
-		try {
-			InputStream input = null;
-			try {
-				int totalBytesRead = 0;
-				input = new BufferedInputStream(new FileInputStream(file));
-				while(totalBytesRead < result.length){
-					int bytesRemaining = result.length - totalBytesRead;
-					int bytesRead = input.read(result);	
-					//int bytesRead = input.read(result, totalBytesRead, bytesRemaining); 
-					ByteBuffer bb= ByteBuffer.wrap(result).order(ByteOrder.BIG_ENDIAN);
-					ShortBuffer sb = bb.asShortBuffer();
-					if (bytesRead > 0){
-						totalBytesRead = totalBytesRead + bytesRead;
-					}
-					while(sb.hasRemaining()){
-						data[dataIndex]=(short) sb.get();	
-						dataIndex++;
-					}
-				}
-			}
-			finally {
-				input.close();
-			}
-		}
-		catch (FileNotFoundException ex) {
-			System.err.println("File not found: ");
-			ex.printStackTrace();
-		}
-		catch (IOException ex) {
-			ex.printStackTrace();
-		}
-		return data;
-	}
-
 	/**
 	 * Creates a panel for the demo (used by SuperDemo.java).
 	 *
