@@ -51,7 +51,7 @@ import org.jfree.ui.RefineryUtilities;
     		for(int n=0;n<data.length-1;n++){
     			//System.out.println("n=" +n + " data[n]=" + data[n]);
     			if(data[n] !=0)
-    			series.add(n,Math.log(data[n]));
+    			series.add(n,data[n]);
     			//series.add(n,data[n]);
     		}
         	result.addSeries(series);
