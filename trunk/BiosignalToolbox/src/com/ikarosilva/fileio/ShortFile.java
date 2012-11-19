@@ -31,6 +31,22 @@ public class ShortFile {
 		in.close();
 		return data;
 	}
+	
+	public static double[] readFile2Double(String file) throws IOException, ClassNotFoundException{
+		//Read Short file from disk	
+		FileInputStream nFile = new FileInputStream(file);
+		ObjectInputStream in = new ObjectInputStream(nFile);
+		short[] tmpdata=null;
+		
+		tmpdata = (short[]) in.readObject();
+		in.close();
+		double[] data=new double[tmpdata.length];
+		for(int i=0;i<tmpdata.length;i++)
+			data[i]=(double)tmpdata[i];
+		
+		return data;
+		
+	}
 
 
 }
