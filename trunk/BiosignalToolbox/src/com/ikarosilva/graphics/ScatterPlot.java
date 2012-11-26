@@ -22,11 +22,14 @@ import org.jfree.ui.RefineryUtilities;
 import org.jfree.util.ShapeUtilities;
 
 @SuppressWarnings("serial")
-public class File2ScatterPlot extends ApplicationFrame {
+public class ScatterPlot extends ApplicationFrame {
 
-	public File2ScatterPlot(String title, File datafile, int x, int y) {
-
+	String title;
+	
+	public ScatterPlot(String title, File datafile, int x, int y) {
+		
 		super(title);
+		this.title=title;
 		XYSeriesCollection dataset = new XYSeriesCollection();
 		XYSeries series1 = new XYSeries("Series 1");
 		Double number = null;
@@ -71,7 +74,7 @@ public class File2ScatterPlot extends ApplicationFrame {
 		dataset.addSeries(series1);
 		
 		JFreeChart chart = ChartFactory.createScatterPlot(
-				"Scatter Plot", // title
+				title, // title
 				"X", "Y", // axis labels
 				dataset, // dataset
 				PlotOrientation.VERTICAL,
@@ -92,6 +95,38 @@ public class File2ScatterPlot extends ApplicationFrame {
 		
 	}
 
+	public ScatterPlot(String title, double[] x,double[] y) {
+
+		super(title);
+		XYSeriesCollection dataset = new XYSeriesCollection();
+		XYSeries series1 = new XYSeries("Series 1");
+		for(int i=0;i<x.length;i++)
+			series1.add(x[i],y[i]);
+		
+		dataset.addSeries(series1);
+		JFreeChart chart = ChartFactory.createScatterPlot(
+				title, // title
+				"X", "Y", // axis labels
+				dataset, // dataset
+				PlotOrientation.VERTICAL,
+				true, // legend? yes
+				true, // tooltips? yes
+				false // URLs? no
+		);
+		ChartPanel chartPanel = new ChartPanel(chart);
+		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+		setContentPane(chartPanel);
+		
+		float thickness=(float) 0.25;
+		float length=3;
+		Shape cross = ShapeUtilities.createDiagonalCross(length, thickness);
+		XYItemRenderer renderer = chart.getXYPlot().getRenderer();
+		renderer.setSeriesPaint(0, Color.blue);
+		renderer.setSeriesShape(0, cross);
+		
+	}
+
+	
 	public static void main(String[] args) {
 		if (args.length !=3) {
 			System.err.println("Usage: java File2ScatterPlot filename ind1 ind2");
@@ -101,7 +136,7 @@ public class File2ScatterPlot extends ApplicationFrame {
 		File datafile= new File(args[0]);
 		int x= Integer.valueOf(args[1]);
 		int y= Integer.valueOf(args[2]);
-		File2ScatterPlot demo = new File2ScatterPlot(datafile.toString(), datafile, x, y);
+		ScatterPlot demo = new ScatterPlot(datafile.toString(), datafile, x, y);
 		demo.pack();
 		RefineryUtilities.centerFrameOnScreen(demo);
 		demo.setVisible(true);
