@@ -17,10 +17,10 @@ import org.jfree.ui.RefineryUtilities;
     public class Plot extends ApplicationFrame {
 
     	static String title;
-        public Plot(String title, Double[] data) {
+        public Plot(String title, double[] timeSeries) {
             super(title);
             this.title=title;
-            JPanel chartPanel = createDemoPanel(data);
+            JPanel chartPanel = createDemoPanel(timeSeries);
             chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
             setContentPane(chartPanel);
         }
@@ -45,13 +45,13 @@ import org.jfree.ui.RefineryUtilities;
             return chart;
         }
        
-        private static XYDataset createDataset(Double[] data) {
+        private static XYDataset createDataset(double[] timeSeries) {
         	XYSeriesCollection result = new XYSeriesCollection();
         	XYSeries series = new XYSeries(1);
-    		for(int n=0;n<data.length-1;n++){
+    		for(int n=0;n<timeSeries.length-1;n++){
     			//System.out.println("n=" +n + " data[n]=" + data[n]);
-    			if(data[n] !=0)
-    			series.add(n,data[n]);
+    			if(timeSeries[n] !=0)
+    			series.add(n,timeSeries[n]);
     			//series.add(n,data[n]);
     		}
         	result.addSeries(series);
@@ -63,34 +63,11 @@ import org.jfree.ui.RefineryUtilities;
          *
          * @return A panel.
          */
-        private static JPanel createDemoPanel(Double[] data) {
-            JFreeChart chart = createChart(createDataset(data));
+        private static JPanel createDemoPanel(double[] timeSeries) {
+            JFreeChart chart = createChart(createDataset(timeSeries));
             return new ChartPanel(chart);
         }
        
-              
-        /**
-         * Starting point for the demonstration application.
-         *
-         * @param args  ignored.
-         */
-        public static void main(String[] args) {
-        	
-        	int N =5000;
-    		Double[] a = new Double[N];
-    		for(int n=0;n<N;n++){
-    			if(n<3){
-    				a[n]=(double) 1;
-    			}else{
-    				a[n]=a[a[n-1].intValue()]+ a[(n-a[n-1].intValue())];
-    			}
-    		}
-        	
-            Plot demo = new Plot(
-                    "Simple",a);
-            demo.pack();
-            RefineryUtilities.centerFrameOnScreen(demo);
-            demo.setVisible(true);
-        }
+
 
     }

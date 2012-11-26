@@ -73,19 +73,20 @@ public class Vgraph {
 		// Test the visibility graph with a sample
 		// fractal signal
 		int N=11;
-		Double[] data= new Double[N];
+		double[] data= new double[N];
 		//data = Conway.sim(N);
 		for(int n=0;n<N;n++)
 			data[n]=(double) 1;
 		//	data[n]=Math.random();
-	
+	/*
 		data[5]=(double) 2;
-		Double[] pk = Vgraph.run(data);	
+		double[] pk = Vgraph.run(data);	
 		Plot plot = new Plot(
 				"P(k)",pk);
 		plot.pack();
 		RefineryUtilities.centerFrameOnScreen(plot);
 		plot.setVisible(true);
+		*/
 	}
 
 }
