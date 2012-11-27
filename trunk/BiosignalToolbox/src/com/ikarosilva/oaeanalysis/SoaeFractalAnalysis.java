@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.optimization.DifferentiableMultivariateVectorOptimizer;
+import org.apache.commons.math3.optimization.fitting.PolynomialFitter;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
@@ -260,7 +262,7 @@ public class SoaeFractalAnalysis {
 		RefineryUtilities.centerFrameOnScreen(demo);
 		demo.setVisible(true);
 
-		//org.apache.commons.math3.optimization.fitting.HarmonicFitter
+		
 				
 		/*
 		//Generate Scatter of phase 
@@ -278,6 +280,7 @@ public class SoaeFractalAnalysis {
 		demo3.pack();
 		RefineryUtilities.centerFrameOnScreen(demo3);
 		demo3.setVisible(true);
+		
 
 
 	}
