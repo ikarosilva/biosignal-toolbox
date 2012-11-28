@@ -2,6 +2,7 @@ package com.ikarosilva.graphics;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.geom.Line2D;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -126,6 +127,41 @@ public class ScatterPlot extends ApplicationFrame {
 		
 	}
 
+	public ScatterPlot(String title, double[] x,double[] y, double[] z) {
+
+		super(title);
+		XYSeriesCollection dataset = new XYSeriesCollection();
+		XYSeries series1 = new XYSeries("Series 1");
+		XYSeries series2 = new XYSeries("Series 2");
+		for(int i=0;i<x.length;i++){
+			series1.add(x[i],y[i]);
+			series2.add(x[i],z[i]);
+		}
+		
+		dataset.addSeries(series1);
+		dataset.addSeries(series2);
+		JFreeChart chart = ChartFactory.createScatterPlot(
+				title, // title
+				"X", "Y", // axis labels
+				dataset, // dataset
+				PlotOrientation.VERTICAL,
+				true, // legend? yes
+				true, // tooltips? yes
+				false // URLs? no
+		);
+		ChartPanel chartPanel = new ChartPanel(chart);
+		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+		setContentPane(chartPanel);
+		
+		float thickness=(float) 0.25;
+		float length=3;
+		Shape cross = ShapeUtilities.createDiagonalCross(length, thickness);
+		XYItemRenderer renderer = chart.getXYPlot().getRenderer();
+		renderer.setSeriesPaint(0, Color.blue);
+		renderer.setSeriesPaint(1, Color.red);
+		renderer.setSeriesShape(0, cross);
+		
+	}
 	
 	public static void main(String[] args) {
 		if (args.length !=3) {

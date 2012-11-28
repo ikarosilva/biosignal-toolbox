@@ -13,9 +13,10 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.complex.Complex;
-import org.apache.commons.math3.optimization.DifferentiableMultivariateVectorOptimizer;
-import org.apache.commons.math3.optimization.fitting.PolynomialFitter;
+import org.apache.commons.math3.optimization.fitting.CurveFitter;
+import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
@@ -240,28 +241,22 @@ public class SoaeFractalAnalysis {
 
 		String tmpFile="/tmp/TMPsoae.txt"; 
 		SoaeFractalAnalysis analysis= new SoaeFractalAnalysis();
-		analysis.getData("/home/ikaro/oae_data/silva2.raw");
-		
-		analysis
-		
-		
-		
-		
-		
-		.getSpectrum();
+		analysis.getData("/home/ikaro/oae_data/silva1.raw");
+		final CurveFitter fitter = new CurveFitter(new LevenbergMarquardtOptimizer());
+		analysis.getSpectrum();
 		analysis.trackSpectrum();
 
-		Shuffler shuffler= new Shuffler(analysis.timeSeries);
-		double [] noise = shuffler.fftShuffle();
-
-		analysis.writeData(tmpFile,noise);
-
+		//Shuffler shuffler= new Shuffler(analysis.timeSeries);
+		//double [] noise = shuffler.fftShuffle();
+		analysis.writeData(tmpFile,analysis.timeSeries);
+		
 		//Plot results
-		Plot demo = new Plot("SEOAE",noise);
+		/*
+		Plot demo = new Plot("SOAE Time Series",analysis.timeSeries);
 		demo.pack();
 		RefineryUtilities.centerFrameOnScreen(demo);
 		demo.setVisible(true);
-
+		*/
 		
 				
 		/*
@@ -274,9 +269,22 @@ public class SoaeFractalAnalysis {
 
 		//Calculate DFA values
 		double[][] results= analysis.getDFA(tmpFile);
+		for(int i=0;i<results[0].length;i++){
+			fitter.addObservedPoint(results[0][i],results[1][i]);
+		}
+		final double[] init = { 1, 1}; // a - bx
 		
+		// Compute optimal coefficients.
+		final double[] best = fitter.fit(new PolynomialFunction.Parametric(), init);
+		// Construct the polynomial that best fits the data.
+		final PolynomialFunction fitted = new PolynomialFunction(best);
+		double[] xhat=new double[results[0].length];
+		for(int i=0;i<results[0].length;i++){
+			xhat[i]=fitted.value(results[0][i]);
+		}
 		//Calculate DFA values
-		ScatterPlot demo3 = new ScatterPlot("DFA",results[0],results[1]);
+		ScatterPlot demo3 = new ScatterPlot("DFA:" + fitted.toString(),results[0],results[1],xhat);
+		
 		demo3.pack();
 		RefineryUtilities.centerFrameOnScreen(demo3);
 		demo3.setVisible(true);
