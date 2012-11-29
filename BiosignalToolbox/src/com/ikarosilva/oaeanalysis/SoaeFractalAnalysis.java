@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
@@ -16,6 +17,8 @@ import java.util.List;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.optimization.fitting.CurveFitter;
+import org.apache.commons.math3.optimization.general.AbstractLeastSquaresOptimizer;
+import org.apache.commons.math3.optimization.general.GaussNewtonOptimizer;
 import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
@@ -39,9 +42,12 @@ public class SoaeFractalAnalysis {
 	double fres=Fs/N;
 	double[] data=new double[N];
 	FastFourierTransformer FFT;
+	double[] Pxx=null;
+	double[] Fxx=null;
 	double[] timeSeries=null;
 	double[] timeSeriesLag=null;
 	BufferedWriter out_log =null;
+	private static String data_dir="/home/ikaro/oae_data/";
 
 	public void getData(String inFileName){
 		//Read Short file from disk	
@@ -94,7 +100,7 @@ public class SoaeFractalAnalysis {
 
 		int k=0;
 		Double tmpdouble=(double) 0;
-	
+
 		for(int i=0;i<data[0].length;i++){
 			for(k=0;k<data.length;k++){
 				try {
@@ -118,10 +124,12 @@ public class SoaeFractalAnalysis {
 		// 8kHz/160 = 50 Hz. So that we look for  a maximum peak at 1kHz +- 200 Hz 
 		FFT= new FastFourierTransformer(DftNormalization.STANDARD);
 		Complex[] A= FFT.transform(data, TransformType.FORWARD);
-		double[] Pxx= new double[A.length];
+		Pxx= new double[A.length];
+		Fxx= new double[A.length];
 
 		for(int i=0;i<Pxx.length;i++){
 			Pxx[i]=A[i].abs();
+			Fxx[i]=fres*(double)i;
 			if(fres*(double)i >= FtrackLB && fres*(double)i <= FtrackUB){
 				if(Pxx[i]>Pmax){
 					Pmax=Pxx[i];
@@ -150,7 +158,7 @@ public class SoaeFractalAnalysis {
 		launcher.redirectErrorStream(true);
 		launcher.command(inputs);
 		int n=0;
-	
+
 		try {
 			Process p = launcher.start();
 			BufferedReader output = new BufferedReader(new InputStreamReader(
@@ -235,65 +243,94 @@ public class SoaeFractalAnalysis {
 			}
 		}
 	}
-	
+
+	public static File[] finder( String dirName){
+		File dir = new File(dirName);
+
+		return dir.listFiles(new FilenameFilter() { 
+			public boolean accept(File dir, String filename)
+			{ return filename.endsWith(".raw"); }
+		} );
+
+	}
+
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 
+		//Get directory listing 
+		File[] oaeFiles=finder(data_dir);
 		String tmpFile="/tmp/TMPsoae.txt"; 
-		SoaeFractalAnalysis analysis= new SoaeFractalAnalysis();
-		analysis.getData("/home/ikaro/oae_data/silva1.raw");
-		final CurveFitter fitter = new CurveFitter(new LevenbergMarquardtOptimizer());
-		analysis.getSpectrum();
-		analysis.trackSpectrum();
-
-		//Shuffler shuffler= new Shuffler(analysis.timeSeries);
-		//double [] noise = shuffler.fftShuffle();
-		analysis.writeData(tmpFile,analysis.timeSeries);
+		double[][] slope=new double[2][oaeFiles.length];
 		
+		for(int i=0;i<oaeFiles.length;i++){
+
+			System.out.println("Analzing: " + oaeFiles[i].getName());
+			SoaeFractalAnalysis analysis= new SoaeFractalAnalysis();
+			analysis.getData(oaeFiles[i].getAbsolutePath());
+			final CurveFitter fitter = new CurveFitter(new GaussNewtonOptimizer());
+			analysis.getSpectrum();
+			analysis.trackSpectrum();
+
+			//Shuffler shuffler= new Shuffler(analysis.timeSeries);
+			//double [] noise = shuffler.fftShuffle();
+			analysis.writeData(tmpFile,analysis.timeSeries);
+
 		//Plot results
-		/*
-		Plot demo = new Plot("SOAE Time Series",analysis.timeSeries);
+			
+		Plot demo = new Plot("SOAE Time Series: "+ oaeFiles[i].getName(),analysis.timeSeries);
 		demo.pack();
 		RefineryUtilities.centerFrameOnScreen(demo);
 		demo.setVisible(true);
-		*/
-		
-				
+			 
+		Plot demo0 = new Plot("Waveform: "+ oaeFiles[i].getName(),analysis.data);
+		demo0.pack();
+		RefineryUtilities.centerFrameOnScreen(demo);
+		demo0.setVisible(true);
+
 		/*
 		//Generate Scatter of phase 
-		ScatterPlot demo2 = new ScatterPlot("Scatter Plot",analysis.timeSeries,analysis.timeSeriesLag);
+		ScatterPlot demo2 = new ScatterPlot("Scatter Plot: " + oaeFiles[i].getName(),analysis.timeSeries,analysis.timeSeriesLag);
 		demo2.pack();
 		RefineryUtilities.centerFrameOnScreen(demo2);
 		demo2.setVisible(true);
-		*/
+			*/ 
 
-		//Calculate DFA values
-		double[][] results= analysis.getDFA(tmpFile);
-		for(int i=0;i<results[0].length;i++){
-			fitter.addObservedPoint(results[0][i],results[1][i]);
+			//Calculate DFA values
+			double[][] results= analysis.getDFA(tmpFile);
+			for(int k=0;k<results[0].length;k++){
+				fitter.addObservedPoint(results[0][k],results[1][k]);
+			}
+			final double[] init = { 1, 1}; // a - bx
+
+			// Compute optimal coefficients.
+			final double[] best = fitter.fit(new PolynomialFunction.Parametric(), init);
+			// Construct the polynomial that best fits the data.
+			final PolynomialFunction fitted = new PolynomialFunction(best);
+			double[] xhat=new double[results[0].length];
+		
+			//Store slope values
+			slope[0][i]=fitted.getCoefficients()[0];
+			slope[1][i]=fitted.getCoefficients()[1];
+			for(int k=0;k<results[0].length;k++){
+				xhat[k]=fitted.value(results[0][k]);
+			}
+			//Calculate DFA values
+			ScatterPlot demo3 = new ScatterPlot(oaeFiles[i].getName() +":" + fitted.toString(),results[0],results[1],xhat);
+			demo3.pack();
+			RefineryUtilities.centerFrameOnScreen(demo3);
+			demo3.setVisible(true);
+	
 		}
-		final double[] init = { 1, 1}; // a - bx
-		
-		// Compute optimal coefficients.
-		final double[] best = fitter.fit(new PolynomialFunction.Parametric(), init);
-		// Construct the polynomial that best fits the data.
-		final PolynomialFunction fitted = new PolynomialFunction(best);
-		double[] xhat=new double[results[0].length];
-		for(int i=0;i<results[0].length;i++){
-			xhat[i]=fitted.value(results[0][i]);
-		}
 		//Calculate DFA values
-		ScatterPlot demo3 = new ScatterPlot("DFA:" + fitted.toString(),results[0],results[1],xhat);
-		
-		demo3.pack();
-		RefineryUtilities.centerFrameOnScreen(demo3);
-		demo3.setVisible(true);
-		
+		ScatterPlot demo4 = new ScatterPlot("Coeff",slope[0],slope[1]);
+		demo4.pack();
+		RefineryUtilities.centerFrameOnScreen(demo4);
+		demo4.setVisible(true);
 
 
 	}
 
-	
+
 }
 
 
