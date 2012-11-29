@@ -26,7 +26,16 @@ import org.jfree.ui.RefineryUtilities;
         }
        
       
-        private static JFreeChart createChart(XYDataset dataset) {
+        public Plot(String title, double[] x, double[] y) {
+			super(title);
+            this.title=title;
+            JPanel chartPanel = createDemoPanel(x,y);
+            chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+            setContentPane(chartPanel);
+		}
+
+
+		private static JFreeChart createChart(XYDataset dataset) {
             // create the chart...
             JFreeChart chart = ChartFactory.createXYLineChart(
                 title,       // chart title
@@ -57,6 +66,17 @@ import org.jfree.ui.RefineryUtilities;
         	result.addSeries(series);
             return result;
         }
+        
+        private static XYDataset createDataset(double[] x,double[] y) {
+        	XYSeriesCollection result = new XYSeriesCollection();
+        	XYSeries series = new XYSeries(1);
+    		for(int n=0;n<x.length-1;n++){
+    			if(x[n] !=0)
+    			series.add(x[n],y[n]);
+    		}
+        	result.addSeries(series);
+            return result;
+        }
 
         /**
          * Creates a panel for the demo (used by SuperDemo.java).
@@ -65,6 +85,10 @@ import org.jfree.ui.RefineryUtilities;
          */
         private static JPanel createDemoPanel(double[] timeSeries) {
             JFreeChart chart = createChart(createDataset(timeSeries));
+            return new ChartPanel(chart);
+        }
+        private static JPanel createDemoPanel(double[] x, double[] y) {
+            JFreeChart chart = createChart(createDataset(x,y));
             return new ChartPanel(chart);
         }
        
