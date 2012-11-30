@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
@@ -191,20 +192,22 @@ public class SoaeFractalAnalysis {
 	public void trackSpectrum(){
 		//Now that the frequency has been selected. Track its power spectrum value as a function of time
 		//over the selected window size.
-		int M=(int) Math.floor(N/winSize);
-		double[] tmpTimeSeries= new double[winSize];
-		timeSeries=new double[M];
+		//int M=(int) Math.floor(N/winSize);
+		//double[] tmpTimeSeries= new double[winSize];
+		int M=data.length;
+		timeSeries=data;//new double[M];
 		timeSeriesLag=new double[timeSeries.length];
 		timeSeriesLag[0]=(double) 0;
-
 		for(int m=0;m<M;m++){
+			
+			/*
 			for(int i=0;i<winSize;i++){
 				tmpTimeSeries[i]=data[m*winSize+i];
 			}
 			Complex[] A1= FFT.transform(tmpTimeSeries, TransformType.FORWARD);
 			timeSeries[m]=Double.valueOf((double) A1[Findex].abs());
+			*/
 			dc+=timeSeries[m];
-			//System.out.println(A1[Findex].abs()+ " F=" + Findex);
 		}
 		dc/=M;	
 		//Subtract DC component
@@ -246,7 +249,6 @@ public class SoaeFractalAnalysis {
 
 	public static File[] finder( String dirName){
 		File dir = new File(dirName);
-
 		return dir.listFiles(new FilenameFilter() { 
 			public boolean accept(File dir, String filename)
 			{ return filename.endsWith(".raw"); }
@@ -259,6 +261,7 @@ public class SoaeFractalAnalysis {
 
 		//Get directory listing 
 		File[] oaeFiles=finder(data_dir);
+		Arrays.sort(oaeFiles);
 		String tmpFile="/tmp/TMPsoae.txt"; 
 		double[][] slope=new double[2][oaeFiles.length];
 		
@@ -276,17 +279,17 @@ public class SoaeFractalAnalysis {
 			analysis.writeData(tmpFile,analysis.timeSeries);
 
 		//Plot results
-			
+		/*	
 		Plot demo = new Plot("SOAE Time Series: "+ oaeFiles[i].getName(),analysis.timeSeries);
 		demo.pack();
 		RefineryUtilities.centerFrameOnScreen(demo);
 		demo.setVisible(true);
-			 
+		 
 		Plot demo0 = new Plot("Waveform: "+ oaeFiles[i].getName(),analysis.data);
 		demo0.pack();
 		RefineryUtilities.centerFrameOnScreen(demo);
 		demo0.setVisible(true);
-
+*/
 		/*
 		//Generate Scatter of phase 
 		ScatterPlot demo2 = new ScatterPlot("Scatter Plot: " + oaeFiles[i].getName(),analysis.timeSeries,analysis.timeSeriesLag);
@@ -297,7 +300,7 @@ public class SoaeFractalAnalysis {
 
 			//Calculate DFA values
 			double[][] results= analysis.getDFA(tmpFile);
-			for(int k=0;k<results[0].length;k++){
+			for(int k=0;k<Math.round(2*results[0].length/6);k++){
 				fitter.addObservedPoint(results[0][k],results[1][k]);
 			}
 			final double[] init = { 1, 1}; // a - bx
@@ -309,7 +312,7 @@ public class SoaeFractalAnalysis {
 			double[] xhat=new double[results[0].length];
 		
 			//Store slope values
-			slope[0][i]=fitted.getCoefficients()[0];
+			slope[0][i]=i;//fitted.getCoefficients()[0];
 			slope[1][i]=fitted.getCoefficients()[1];
 			for(int k=0;k<results[0].length;k++){
 				xhat[k]=fitted.value(results[0][k]);
@@ -322,7 +325,7 @@ public class SoaeFractalAnalysis {
 	
 		}
 		//Calculate DFA values
-		ScatterPlot demo4 = new ScatterPlot("Coeff",slope[0],slope[1]);
+		ScatterPlot demo4 = new ScatterPlot("DFA Coeff",slope[0],slope[1]);
 		demo4.pack();
 		RefineryUtilities.centerFrameOnScreen(demo4);
 		demo4.setVisible(true);
