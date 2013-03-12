@@ -48,7 +48,7 @@ public class SoaeFractalAnalysis {
 	double[] timeSeries=null;
 	double[] timeSeriesLag=null;
 	BufferedWriter out_log =null;
-	private static String data_dir="/home/ikaro/oae_data/";
+	private static String data_dir="/mnt/data/ikaro/audiopulse/oae_data/";
 
 	public void getData(String inFileName){
 		//Read Short file from disk	
@@ -329,7 +329,7 @@ public class SoaeFractalAnalysis {
 		demo4.pack();
 		RefineryUtilities.centerFrameOnScreen(demo4);
 		demo4.setVisible(true);
-
+		
 
 	}
 
