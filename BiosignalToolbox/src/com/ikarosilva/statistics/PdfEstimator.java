@@ -31,9 +31,10 @@ public class PdfEstimator {
 			}else{
 				UB=data.size()-1;
 			}		
-			y[n][0]=data.get(LB);
-			y[n][1]=data.get(UB);
-			y[n][2]=(double) (UB-LB)/data.size();
+			
+			y[n][0]=(double) (UB-LB)/data.size();
+			y[n][1]=data.get(LB);
+			y[n][2]=data.get(UB);
 			LB=UB+1;
 			System.out.println(y[n][0] +"," + y[n][1] +","+ y[n][2] + "\n");
 		}
@@ -51,7 +52,7 @@ public class PdfEstimator {
 			x.add((double) Math.random());
 		}
 		hist=equipartition(x,10);
-		//System.out.println("Entropy= " + Entropy.NormalizedEntropy(hist));
+		System.out.println("Entropy= " + Entropy.DifferentialEntropy(hist));
 	}
 
 }
