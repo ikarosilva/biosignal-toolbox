@@ -33,6 +33,14 @@ import org.jfree.ui.RefineryUtilities;
             chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
             setContentPane(chartPanel);
 		}
+        
+        public Plot(String title, double[][] x) {
+        	super(title);
+            this.title=title;
+            JPanel chartPanel = createDemoPanel(x[0],x[1]);
+            chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+            setContentPane(chartPanel);
+		}
 
 
 		private static JFreeChart createChart(XYDataset dataset) {
