@@ -81,6 +81,13 @@ public class PdfEstimator {
 		//Initialize HashMap,
 		double scaleX=(N-1)/rangeX;
 		double scaleY=(N-1)/rangeY;
+		double stepX=(double)rangeX/N;
+		double stepY=(double)rangeY/N;
+        double picketFenceX=(maxX+stepX)/maxX;
+        double picketFenceY=(maxY+stepY)/maxY;
+        double offsetX=(double)stepX/2;
+        double offsetY=(double)stepY/2;
+        
 		double wcount= (double) 1/x.size();
 		int key; 
 		Double tmp;
@@ -89,8 +96,8 @@ public class PdfEstimator {
 		System.out.println("wcount= "+wcount);
 		for(int i=0;i<x.size();i++){
 			//TODO: fix picket fence issues
-			nX=( (int) Math.floor((x.get(i)-minX)*scaleX  ) );
-			nY=( (int) Math.floor((y.get(i)-minY)*scaleY  ) ) ;
+			nX= (int) Math.round((x.get(i)*picketFenceX-minX-offsetX)*scaleX  );
+			nY= (int) Math.round((y.get(i)*picketFenceY-minY-offsetY)*scaleY  );
 			//Map subscript to absolute index
 			key=N*nX + nY;
 			tmp=xy.get(key);
@@ -130,12 +137,12 @@ public class PdfEstimator {
 		ArrayList<Double> x= new ArrayList<Double>();
 		ArrayList<Double> y= new ArrayList<Double>();
 		double[][] hist;
-		int N=30, bins=3;
+		int N=1000, bins=6;
 		for(int n=0;n<N;n++){
 			//x.add((double) Math.random());
 			x.add((double) n);
-			//y.add((double) n);
-			y.add(x.get(n));
+			y.add((double) n);
+			//y.add(x.get(n));
 			//y.add((double) Math.random());
 		}
 		PdfEstimator pdf=new PdfEstimator();
