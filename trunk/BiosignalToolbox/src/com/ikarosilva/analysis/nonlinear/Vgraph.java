@@ -1,7 +1,6 @@
 package com.ikarosilva.analysis.nonlinear;
 import org.jfree.ui.RefineryUtilities;
 
-import com.ikarosilva.fractals.Conway;
 import com.ikarosilva.graphics.Plot;
 
 //Visibility Graph 
