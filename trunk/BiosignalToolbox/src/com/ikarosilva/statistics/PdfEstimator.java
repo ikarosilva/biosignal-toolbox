@@ -89,7 +89,7 @@ public class PdfEstimator {
 				if(i<(M-1))
 					System.out.print(",");
 			}
-			System.out.println("]=" + pdf.get(d) +"\t");
+			System.out.println("]=" + pdf.get(d));
 		}
 		return pdf;
 
