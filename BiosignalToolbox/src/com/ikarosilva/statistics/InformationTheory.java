@@ -114,6 +114,13 @@ public class InformationTheory {
 		return H;
 	}
 
+	public static double SanovProbability(double[] P, double[] Q, int n){
+		return Math.pow(2,-(double)n*InformationTheory.RelativeEntropy(P,Q));
+	}
+	
+	public static double IndependenceTest(double[] P, double[] Q, double[][] PQ, int n){
+		return Math.pow(2,-(double)n*InformationTheory.MutualInformation(P, Q,PQ));
+	}
 
 	public static double MutualInformation(double[] x, double[] y, double[][] joint){
 		//Assumes square matrix and joint of equal size
