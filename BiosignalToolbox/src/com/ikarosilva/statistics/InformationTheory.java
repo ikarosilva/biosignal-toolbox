@@ -146,6 +146,26 @@ public class InformationTheory {
 		return D;	
 	}
 	
+	public static double EntropyNormalDistribution(double variance){
+		return 0.5*( Math.log(2*Math.PI*Math.E*variance)/ Math.log(2) );
+	}
+	
+	public static double EntropyKNormalDistribution(double determinant, int n){
+		//determinant = |K| of the covariance matrix
+		double c=Math.pow(2*Math.PI*Math.E,(double) n);
+		return 0.5*( Math.log(c*determinant)/ Math.log(2) );
+	}
+	
+	
+	public static double EstimationErrorBound(double[] X){
+		//Assumes (pg 255):
+		//1) Estimate is unbiased
+		//2) Gaussian distribution on the bound
+		double hx=InformationTheory.DiscreteEntropy(X);
+		return Math.pow(Math.E,2*hx)/(2*Math.PI*Math.E);
+	}
+	
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
