@@ -157,12 +157,22 @@ public class InformationTheory {
 		return 0.5*( Math.log(2*Math.PI*Math.E*variance)/ Math.log(2) );
 	}
 	
-	public static double EntropyKNormalDistribution(double determinant, int n){
+	public static double EntropyRateNormalDistribution(int n, double determinant){
+		//From Cover & Thomas pg 416
+		double factor1=Math.pow(2*Math.PI*Math.E,n);
+		double factor2=Math.pow(determinant,n);
+		return 0.5*( Math.log(factor1*factor2)/ Math.log(2) );
+	}
+	
+	public static double EntropyNormalDistribution(double determinant, int n){
 		//determinant = |K| of the covariance matrix
 		double c=Math.pow(2*Math.PI*Math.E,(double) n);
 		return 0.5*( Math.log(c*determinant)/ Math.log(2) );
 	}
 	
+	public static double EntropyRateGaussMarkovProcess(double var){;
+		return EntropyRateNormalDistribution(1,var);
+	}
 	
 	public static double EstimationErrorBound(double[] X){
 		//Assumes (pg 255):
