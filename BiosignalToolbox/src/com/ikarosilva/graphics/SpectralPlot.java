@@ -23,11 +23,13 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 
-    public class SpectralPlottingDemo1 extends ApplicationFrame {
+import com.ikarosilva.analysis.nonlinear.NonlinearProcess;
 
-        public SpectralPlottingDemo1(String title) {
+    public class SpectralPlot extends ApplicationFrame {
+
+        public SpectralPlot(String title,double[] data, double Fs) {
             super(title);
-            JPanel chartPanel = createDemoPanel();
+            JPanel chartPanel = createDemoPanel(data,Fs);
             chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
             setContentPane(chartPanel);
         }
@@ -51,18 +53,10 @@ import org.jfree.ui.RefineryUtilities;
             return chart;
         }
        
-        public static XYDataset createDataset() {
+        public static XYDataset createDataset(double[] data, double Fs) {
         	XYSeriesCollection result = new XYSeriesCollection();
         	XYSeries series = new XYSeries(1);
-        	int N =1024*4;
-        	double Fs=8000;
-        	double[] data=null;
-    		try {
-    			data = readBinary2("/home/ikaro/oae_data/silva2.raw");
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		}
-        	
+        	int N = data.length;	
     		//Calculate spectrum 
     		FastFourierTransformer FFT = new FastFourierTransformer(DftNormalization.STANDARD);
     		Complex[] A= FFT.transform(data, TransformType.FORWARD);
@@ -76,17 +70,10 @@ import org.jfree.ui.RefineryUtilities;
         	//result.addSeries(series2);
             return result;
         }
-        public static JPanel createDemoPanel() {
-            JFreeChart chart = createChart(createDataset());
+        public static JPanel createDemoPanel(double[] data, double Fs) {
+            JFreeChart chart = createChart(createDataset(data,Fs));
             return new ChartPanel(chart);
         }      
-        public static void main(String[] args) {
-            SpectralPlottingDemo1 demo = new SpectralPlottingDemo1(
-                    "Test");
-            demo.pack();
-            RefineryUtilities.centerFrameOnScreen(demo);
-            demo.setVisible(true);
-        }
         
         public static double[] readBinary2(String aInputFileName) throws IOException{
     		
@@ -125,5 +112,15 @@ import org.jfree.ui.RefineryUtilities;
     		return data;
     		
     	}
+        
+        public static void main(String[] args) {
+        	double[] data= NonlinearProcess.Conway(1024);
+        	double Fs=1;
+            SpectralPlot demo = new SpectralPlot(
+                    "test",data,Fs);
+            demo.pack();
+            RefineryUtilities.centerFrameOnScreen(demo);
+            demo.setVisible(true);
+        }
 
     }
