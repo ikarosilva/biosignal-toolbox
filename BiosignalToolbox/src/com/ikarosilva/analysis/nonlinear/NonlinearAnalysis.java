@@ -2,7 +2,9 @@ package com.ikarosilva.analysis.nonlinear;
 
 
 import java.io.IOException;
+
 import org.jfree.ui.RefineryUtilities;
+
 import com.ikarosilva.graphics.Plot;
 
 public class NonlinearAnalysis {

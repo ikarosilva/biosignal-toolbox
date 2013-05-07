@@ -1,7 +1,4 @@
 package com.ikarosilva.analysis.nonlinear;
-import org.jfree.ui.RefineryUtilities;
-
-import com.ikarosilva.graphics.Plot;
 
 //Visibility Graph 
 //source: "From time series to complex networks: The visibility graph

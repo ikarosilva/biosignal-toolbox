@@ -18,16 +18,12 @@ import java.util.List;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.optimization.fitting.CurveFitter;
-import org.apache.commons.math3.optimization.general.AbstractLeastSquaresOptimizer;
 import org.apache.commons.math3.optimization.general.GaussNewtonOptimizer;
-import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 import org.jfree.ui.RefineryUtilities;
 
-import com.ikarosilva.analysis.nonlinear.Shuffler;
-import com.ikarosilva.graphics.Plot;
 import com.ikarosilva.graphics.ScatterPlot;
 
 public class SoaeFractalAnalysis {
