@@ -2,6 +2,7 @@
     package com.ikarosilva.graphics;
 
 import java.util.Random;
+
 import javax.swing.JPanel;
 
 import org.jfree.chart.ChartFactory;

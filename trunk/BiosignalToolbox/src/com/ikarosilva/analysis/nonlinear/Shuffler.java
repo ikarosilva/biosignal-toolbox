@@ -8,9 +8,6 @@ import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
-import org.jfree.ui.RefineryUtilities;
-import com.ikarosilva.graphics.Plot;
-import com.ikarosilva.graphics.SpectralPlot;
 
 public class Shuffler {
 
@@ -31,9 +28,10 @@ public class Shuffler {
 		// linear dynamics with linear measurements as the Null Hypothesis as an 
 		// implicit assumption.
 		//Generate FFT from original time series and store
-		int NFFT=(int) Math.pow(2,Math.floor(Math.log((int) xin.length)/Math.log(2)));		
+		int NFFT=(int) Math.pow(2,Math.ceil(Math.log((int) xin.length)/Math.log(2)));		
 		double[] x = Arrays.copyOf(xin,NFFT);
-
+		double[] y= new double[xin.length];
+		
 		Complex[] XFFT=new Complex[NFFT];
 		//Get powerspectrum of data and calculate maximum peak around Ftrack
 		FFT = new FastFourierTransformer(DftNormalization.STANDARD);
@@ -41,7 +39,6 @@ public class Shuffler {
 		double phase=0;
 		double amp=0;
 		int midFFT=((int) NFFT/2);
-		double[] y= new double[NFFT];
 		Complex[] YFFT=new  Complex[NFFT];
 		YFFT[0]=XFFT[0];
 		YFFT[midFFT]=XFFT[midFFT];
@@ -57,7 +54,7 @@ public class Shuffler {
 		}
 		//Reconstruct in the time-domain
 		YFFT=FFT.transform(YFFT,TransformType.INVERSE);
-		for(int i=0;i<NFFT;i++)
+		for(int i=0;i<xin.length;i++)
 			y[i]=YFFT[i].getReal();
 		return y;
 	}
@@ -115,10 +112,13 @@ public class Shuffler {
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 
 
-		int N=1024;	
+		int N=600;	
 		double[] timeSeries= NonlinearProcess.Conway(N);
 		double[] surrogate=AmplitudeAdjustedPhaseShuffle(timeSeries);
 
+		for(int n=0;n<N;n++)
+			System.out.println(surrogate[n]);
+		/*
 		Plot demo = new Plot("Orginal Time Series",timeSeries);
 		demo.pack();
 		RefineryUtilities.centerFrameOnScreen(demo);
@@ -143,7 +143,7 @@ public class Shuffler {
 		demo3.pack();
 		RefineryUtilities.centerFrameOnScreen(demo3);
 		demo3.setVisible(true);
-
+		*/
 	}
 
 }
