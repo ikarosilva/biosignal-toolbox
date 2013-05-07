@@ -63,7 +63,7 @@ import com.ikarosilva.analysis.nonlinear.NonlinearProcess;
     		double fres= (double) Fs/N;
     		//System.out.println("res is " + fres);
     		for(int n=0;n<(N/2);n++){
-    			series.add(((double) 0) + n*fres, A[n].abs());
+    			series.add(((double) 0) + n*fres, Math.log(A[n].abs()));
     		}
     		
         	result.addSeries(series);
