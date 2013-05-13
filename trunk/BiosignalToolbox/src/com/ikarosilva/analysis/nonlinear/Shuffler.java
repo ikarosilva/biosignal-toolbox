@@ -8,6 +8,10 @@ import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
+import org.jfree.ui.RefineryUtilities;
+
+import com.ikarosilva.graphics.Plot;
+import com.ikarosilva.graphics.SpectralPlot;
 
 public class Shuffler {
 
@@ -116,9 +120,9 @@ public class Shuffler {
 		double[] timeSeries= NonlinearProcess.Conway(N);
 		double[] surrogate=AmplitudeAdjustedPhaseShuffle(timeSeries);
 
-		for(int n=0;n<N;n++)
-			System.out.println(surrogate[n]);
-		/*
+		//for(int n=0;n<N;n++)
+		//	System.out.println(surrogate[n]);
+		
 		Plot demo = new Plot("Orginal Time Series",timeSeries);
 		demo.pack();
 		RefineryUtilities.centerFrameOnScreen(demo);
@@ -143,7 +147,7 @@ public class Shuffler {
 		demo3.pack();
 		RefineryUtilities.centerFrameOnScreen(demo3);
 		demo3.setVisible(true);
-		*/
+		
 	}
 
 }

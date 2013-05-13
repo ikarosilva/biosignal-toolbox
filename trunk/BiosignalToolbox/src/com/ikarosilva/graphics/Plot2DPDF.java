@@ -39,19 +39,19 @@ class PDFXYZDataset implements XYZDataset {
         return 1;
     }
     public int getItemCount(int series) {
-        return data[0].length;
+        return data[0].length*data[0].length;
     }
     public Number getX(int series, int item) {
         return new Double(getXValue(series, item));
     }
     public double getXValue(int series, int item) {
-        return item;
+        return (item%data[0].length);
     }
     public Number getY(int series, int item) {
-        return new Double(getYValue(series, item));
+        return new Double(getYValue(series,item));
     }
     public double getYValue(int series, int item) {
-        return item;
+        return Math.floor(item/data[0].length);
     }
     public Number getZ(int series, int item) {
         return new Double(getZValue(series, item));
@@ -74,7 +74,7 @@ class PDFXYZDataset implements XYZDataset {
         // ignore
     }
     public Comparable getSeriesKey(int series) {
-        return "2D-PDF";
+        return "";
     }
     public int indexOf(Comparable seriesKey) {
         return 0;
@@ -153,20 +153,20 @@ public class Plot2DPDF extends ApplicationFrame {
 		double[] x= new double[N];
 		double[] y= new double[N];
 		double[][] z= new double [N][N];
-		Random generator = new Random(12345678L);//Random(System.currentTimeMillis());
+		Random generator = new Random(System.currentTimeMillis());
 		for (int i = 0; i < N; i++) {
 			x[i]=generator.nextGaussian();
 			for (int k = 0; k < N; k++) {
 				y[k]=generator.nextGaussian();
-				z[i][k]=x[i]*y[k];
+				z[i][k]=y[k]*y[k];
 			}
 		}
-
 		Plot2DPDF demo = new Plot2DPDF(
 				"PDF",z);
 		demo.pack();
 		RefineryUtilities.centerFrameOnScreen(demo);
 		demo.setVisible(true);
+		
 	}
 
 }
