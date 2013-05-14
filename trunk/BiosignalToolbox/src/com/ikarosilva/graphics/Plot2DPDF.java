@@ -30,6 +30,8 @@ import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.RefineryUtilities;
 
+import com.ikarosilva.statistics.BinomialGaussianPdf;
+
 class PDFXYZDataset implements XYZDataset {
 	private double[][] data;
 	public PDFXYZDataset(double[][] data) {
@@ -148,19 +150,11 @@ public class Plot2DPDF extends ApplicationFrame {
 
 	public static void main(String[] args) {
 
-		int N=100;
-		int bins=100;
-		double[] x= new double[N];
-		double[] y= new double[N];
-		double[][] z= new double [N][N];
-		Random generator = new Random(System.currentTimeMillis());
-		for (int i = 0; i < N; i++) {
-			x[i]=generator.nextGaussian();
-			for (int k = 0; k < N; k++) {
-				y[k]=generator.nextGaussian();
-				z[i][k]=y[k]*y[k];
-			}
-		}
+		int N=10000;
+		double stdx=0.5, stdy=0.5, p=0,mx=N/2,my=N/2;
+		BinomialGaussianPdf normalPdf= 
+				new BinomialGaussianPdf(mx,my,stdx,stdy,p);
+		double[][] z= normalPdf.eval(N);
 		Plot2DPDF demo = new Plot2DPDF(
 				"PDF",z);
 		demo.pack();
