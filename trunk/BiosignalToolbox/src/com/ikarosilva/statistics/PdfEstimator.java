@@ -9,13 +9,22 @@ public class PdfEstimator {
 	private double[][] pdf;
 	private int Nbins;
 	private int M;
+	private double[][] minmax; //minimum and maximum values for bins (ie, range)
 
 	public PdfEstimator(){
+		Nbins=0;
+	}
 
+	public PdfEstimator(int Nbins){
+		this.Nbins=Nbins;
+	}
+	public PdfEstimator(int Nbins, double[][] range){
+		this.Nbins=Nbins;
+		this.minmax=range;
 	}
 
 	private double[] minMax(double[] x){
-		//Returns minmax for a vector
+		//Returns minmax (ie, range ) for a vector
 		double[] minMax=new double[2];
 		minMax[0]=Double.MAX_VALUE;
 		minMax[1]=Double.MIN_VALUE;
@@ -27,11 +36,9 @@ public class PdfEstimator {
 	}
 
 	public HashMap<Integer, Double> equipartition(double[][] x, int N){
-		Nbins=N;
 		M=x.length;
 		int samples=x[0].length;
 		double wcount= (double) 1/samples;
-		double[][] minmax=new double[M][2];
 		double[] range=new double[M];
 		double[] scale= new double[M];
 		double[] step= new double[M];
@@ -43,11 +50,20 @@ public class PdfEstimator {
 		Double tmp;
 		HashMap<Integer,Double> pdf=new HashMap<Integer,Double>();
 
-		System.out.println("M=" + M + " samps= " + samples);
+		
+		
 		//Initialize parameters for the the pdf
+		if(Nbins ==0)
+			Nbins=N;
+		
+		if(minmax == null){
+			minmax=new double[M][2];
+			for(int i=0;i<M;i++)
+				minmax[i]=minMax(x[i]);
+		}
+
 		for(int i=0;i<M;i++)
 		{
-			minmax[i]=minMax(x[i]);
 			range[i]= minmax[i][1]-minmax[i][0];
 			scale[i]=(double)(Nbins-1)/range[i];
 			step[i]=(double)range[i]/Nbins;
@@ -59,7 +75,8 @@ public class PdfEstimator {
 		//then use the HashMap to add to the count
 		//The HashMap will be created by normalizing the variable and
 		//multiplying by the number of bins. So keys are in the 
-		// round(normalized*Nbins) domain //TODO: ensure capacity ??
+		// round(normalized*Nbins) domain 
+		//TODO: ensure capacity ??
 		for(int i=0;i<samples;i++){
 			//TODO: fix picket fence issues
 			key=0;
@@ -100,8 +117,8 @@ public class PdfEstimator {
 		//Test the histogram estimation
 		ArrayList<Double> y= new ArrayList<Double>();
 		HashMap<Integer,Double> hist;
-		int samples=4, bins=4;
-		int dim=2;
+		int samples=10, bins=4;
+		int dim=1;
 		double[][] x= new double[dim][samples];
 		for(int n=0;n<samples;n++){
 			//x[0][n]= Math.random();
@@ -111,7 +128,7 @@ public class PdfEstimator {
 			//y.add(x.get(n));
 			//x[1][n]=Math.random();
 		}
-		PdfEstimator pdf=new PdfEstimator();
+		PdfEstimator pdf=new PdfEstimator(bins);
 		hist=pdf.equipartition(x,bins);
 	}
 
