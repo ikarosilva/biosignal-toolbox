@@ -7,6 +7,10 @@ package com.ikarosilva.graphics;
  */
 import java.awt.Color;
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
 
 import javax.swing.JPanel;
@@ -35,55 +39,71 @@ import com.ikarosilva.statistics.BinomialGaussianPdf;
 class PDFXYZDataset implements XYZDataset {
 	private double[][] data;
 	public PDFXYZDataset(double[][] data) {
+
+		//normalize the data by maximum  value
+		double max=0;
 		this.data=data;
+		for(int i=0;i<2;i++){
+			for(int k=0;k<data[0].length;k++)
+				max=(max<data[i][k]) ? data[i][k]:max;  
+		}
+		if(max !=0){
+			for(int i=0;i<2;i++){
+				for(int k=0;k<data[0].length;k++){
+					this.data[i][k]=data[i][k]/max;
+					System.out.println(this.data[i][k]);
+				}
+			}
+		}
+
 	}
 	public int getSeriesCount() {
-        return 1;
-    }
-    public int getItemCount(int series) {
-        return data[0].length*data[0].length;
-    }
-    public Number getX(int series, int item) {
-        return new Double(getXValue(series, item));
-    }
-    public double getXValue(int series, int item) {
-        return (item%data[0].length);
-    }
-    public Number getY(int series, int item) {
-        return new Double(getYValue(series,item));
-    }
-    public double getYValue(int series, int item) {
-        return Math.floor(item/data[0].length);
-    }
-    public Number getZ(int series, int item) {
-        return new Double(getZValue(series, item));
-    }
-    public double getZValue(int series, int item) {
-        int x = (int) getXValue(series, item);
-        int y = (int) getYValue(series, item);
-        return data[x][y];
-    }
-    public void addChangeListener(DatasetChangeListener listener) {
-        // ignore - this dataset never changes
-    }
-    public void removeChangeListener(DatasetChangeListener listener) {
-        // ignore
-    }
-    public DatasetGroup getGroup() {
-        return null;
-    }
-    public void setGroup(DatasetGroup group) {
-        // ignore
-    }
-    public Comparable getSeriesKey(int series) {
-        return "";
-    }
-    public int indexOf(Comparable seriesKey) {
-        return 0;
-    }
-    public DomainOrder getDomainOrder() {
-        return DomainOrder.ASCENDING;
-    }
+		return 1;
+	}
+	public int getItemCount(int series) {
+		return data[0].length*data[0].length;
+	}
+	public Number getX(int series, int item) {
+		return new Double(getXValue(series, item));
+	}
+	public double getXValue(int series, int item) {
+		return (item%data[0].length);
+	}
+	public Number getY(int series, int item) {
+		return new Double(getYValue(series,item));
+	}
+	public double getYValue(int series, int item) {
+		return Math.floor(item/data[0].length);
+	}
+	public Number getZ(int series, int item) {
+		return new Double(getZValue(series, item));
+	}
+	public double getZValue(int series, int item) {
+		int x = (int) getXValue(series, item);
+		int y = (int) getYValue(series, item);
+		return data[x][y];
+	}
+	public void addChangeListener(DatasetChangeListener listener) {
+		// ignore - this dataset never changes
+	}
+	public void removeChangeListener(DatasetChangeListener listener) {
+		// ignore
+	}
+	public DatasetGroup getGroup() {
+		return null;
+	}
+	public void setGroup(DatasetGroup group) {
+		// ignore
+	}
+	public Comparable getSeriesKey(int series) {
+		return "";
+	}
+	public int indexOf(Comparable seriesKey) {
+		return 0;
+	}
+	public DomainOrder getDomainOrder() {
+		return DomainOrder.ASCENDING;
+	}
 }
 
 public class Plot2DPDF extends ApplicationFrame {
@@ -141,17 +161,17 @@ public class Plot2DPDF extends ApplicationFrame {
 	}
 
 	private static XYZDataset createDataset(double[][] data) {
-        return new PDFXYZDataset(data);
-    }
-	 
+		return new PDFXYZDataset(data);
+	}
+
 	public static JPanel createDemoPanel(double[][] data) {
 		return new ChartPanel(createChart(createDataset(data)));
 	}
 
 	public static void main(String[] args) {
 
-		int N=10000;
-		double stdx=0.5, stdy=0.5, p=0,mx=N/2,my=N/2;
+		int N=100;
+		double stdx=0.001, stdy=0.001, p=0,mx=N/2,my=N/2;
 		BinomialGaussianPdf normalPdf= 
 				new BinomialGaussianPdf(mx,my,stdx,stdy,p);
 		double[][] z= normalPdf.eval(N);
@@ -160,7 +180,7 @@ public class Plot2DPDF extends ApplicationFrame {
 		demo.pack();
 		RefineryUtilities.centerFrameOnScreen(demo);
 		demo.setVisible(true);
-		
+
 	}
 
 }
