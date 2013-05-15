@@ -94,7 +94,6 @@ public class Shuffler {
 
 	}
 	public static double[] AmplitudeAdjustedPhaseShuffle(final double[] source){
-		//TODO: implement method in pg 356
 		//Underlying assumption is that the Null Hypothesis consists
 		//of linear dynamics with possibly non-linear, monotonically increasing,
 		//measurement function.
@@ -120,9 +119,6 @@ public class Shuffler {
 		double[] timeSeries= NonlinearProcess.Conway(N);
 		double[] surrogate=AmplitudeAdjustedPhaseShuffle(timeSeries);
 
-		//for(int n=0;n<N;n++)
-		//	System.out.println(surrogate[n]);
-		
 		Plot demo = new Plot("Orginal Time Series",timeSeries);
 		demo.pack();
 		RefineryUtilities.centerFrameOnScreen(demo);
