@@ -20,22 +20,31 @@ public class BernoulliBayesEstimation {
 		p=(sumX+1)/(n+2);
 		return p;
 	}
-	public double[] estimatePosterior(double[] pvals){
-		double[] posterior=new double[pvals.length];
+
+	public void resetP(){
+		p=0;
+		sumX=0;
+		n=0;
+	}
+
+	public double[][] estimatePosterior(int N){
+		double[][] posterior=new double[N][2];
 		double numerator=0, denominator=0;
-		for(int i=0;i<pvals.length;i++){
+		double pvals=0;
+		for(int i=0;i<N;i++){
+			pvals=(double) i/N;
 			try {
-				numerator=Factorial.factorial(n-1)*Math.pow(pvals[i],sumX)
-						*Math.pow(1-pvals[i],n-sumX);	
+				numerator=Factorial.factorial(n-1)*Math.pow(pvals,sumX)
+						*Math.pow(1-pvals,n-sumX);	
 				denominator=Factorial.factorial((int) sumX)*
 						Factorial.factorial((int) (n-sumX));
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 			}
-			posterior[i]=numerator/denominator;
+			posterior[i][0]=pvals;
+			posterior[i][1]=numerator/denominator;
 		}
 		return posterior;
-
 	}
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
