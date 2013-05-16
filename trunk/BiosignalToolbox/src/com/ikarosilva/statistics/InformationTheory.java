@@ -44,45 +44,45 @@ package com.ikarosilva.statistics;
 public class InformationTheory {
 
 
-	public static double DiscreteEntropy(double[] pdf){
+	public static double DiscreteEntropy(double[] pmf){
 		double H = 0;
-		for (int i=0; i<pdf.length;i++){
-			H-= pdf[i]*( Math.log(pdf[i])/ Math.log(2) );
+		for (int i=0; i<pmf.length;i++){
+			H-= pmf[i]*( Math.log(pmf[i])/ Math.log(2) );
 		}
 		return H;
 	}
 
-	public static double NormalizedDiscreteEntropy(double[] pdf){
-		double scale=Math.log(pdf.length)/ Math.log(2);
-		return DiscreteEntropy(pdf)/scale;
+	public static double NormalizedDiscreteEntropy(double[] pmf){
+		double scale=Math.log(pmf.length)/ Math.log(2);
+		return DiscreteEntropy(pmf)/scale;
 	}
 
-	public static double JointEntropy(double[][] pdf){
+	public static double JointEntropy(double[][] pmf){
 		//Assumes square matrix
 		double H = 0;
-		for (int i=0; i<pdf.length;i++){
-			for (int k=0; k<pdf[0].length;k++){
-				H-= pdf[i][k]*( Math.log(pdf[i][k])/ Math.log(2) );
+		for (int i=0; i<pmf.length;i++){
+			for (int k=0; k<pmf[0].length;k++){
+				H-= pmf[i][k]*( Math.log(pmf[i][k])/ Math.log(2) );
 			}
 		}
 		return H;
 	}
 
-	public static double ConditionalEntropy(double[][] pdf, double[][] condpdf){
+	public static double ConditionalEntropy(double[][] pmf, double[][] condpmf){
 		//Assumes square matrix and joint of equal size
 		double H = 0;
-		for (int i=0; i<pdf.length;i++){
-			for (int k=0; k<pdf[0].length;k++){
-				H-= pdf[i][k]*( Math.log(condpdf[i][k])/ Math.log(2) );
+		for (int i=0; i<pmf.length;i++){
+			for (int k=0; k<pmf[0].length;k++){
+				H-= pmf[i][k]*( Math.log(condpmf[i][k])/ Math.log(2) );
 			}
 		}
 		return H;
 	}
 
-	public static double RelativeEntropy(double[] pdfX,double[] pdfY){
+	public static double RelativeEntropy(double[] pmfX,double[] pmfY){
 		double H = 0;
-		for (int i=0; i<pdfX.length;i++){
-			H-= pdfX[i]*( Math.log(pdfX[i]/pdfY[i])/ Math.log(2) );
+		for (int i=0; i<pmfX.length;i++){
+			H-= pmfX[i]*( Math.log(pmfX[i]/pmfY[i])/ Math.log(2) );
 		}
 		return H;
 	}
@@ -101,7 +101,7 @@ public class InformationTheory {
 	}
 
 	public static double DifferentialEntropy(double[][] pdf){
-		//input is [][] from PdfEstimator
+		//input is [][] from PmfEstimator
 		//where 2nd column is x lower bound indices,
 		//and 3rd is upper bound index and 1st column is
 		//probability density
@@ -133,7 +133,7 @@ public class InformationTheory {
 		return H;
 	}
 
-	public static double CDDistance(double[] pdf1,double[] pdf2){
+	public static double CDDistance(double[] pmf1,double[] pmf2){
 		double D=Double.NaN;
 		double RMAX=Double.MIN_VALUE;
 		double RMIN= Double.MAX_VALUE;
@@ -141,11 +141,11 @@ public class InformationTheory {
 		//Calculates CD distance 
 		//Acording to 
 		//Modeling and Reasoning with Bayesian Networks, Adnan Darwiche (2009)
-		//pg 418 (D=  ln max(x) LR - ln min(x) LR  where LR= pdf1(x)/pdf2(x)
+		//pg 418 (D=  ln max(x) LR - ln min(x) LR  where LR= pmf1(x)/pmf2(x)
 		
-		//Assumes: pdf1 and pdf2 are ranked and same size
-		for(int i=0;i<pdf2.length;i++){
-			R=pdf1[i]/pdf2[i];
+		//Assumes: pmf1 and pmf2 are ranked and same size
+		for(int i=0;i<pmf2.length;i++){
+			R=pmf1[i]/pmf2[i];
 			RMAX=(R>RMAX) ? R:RMAX;
 			RMIN=(R<RMIN) ? R:RMIN;
 		}

@@ -2,7 +2,7 @@ package com.ikarosilva.statistics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-public class PdfEstimator {
+public class PmfEstimator {
 
 
 	//px : 1 column= probability, 2nd column lower bound, 3rd column upper bound
@@ -11,14 +11,14 @@ public class PdfEstimator {
 	private int M;
 	private double[][] minmax; //minimum and maximum values for bins (ie, range)
 
-	public PdfEstimator(){
+	public PmfEstimator(){
 		Nbins=0;
 	}
 
-	public PdfEstimator(int Nbins){
+	public PmfEstimator(int Nbins){
 		this.Nbins=Nbins;
 	}
-	public PdfEstimator(int Nbins, double[][] range){
+	public PmfEstimator(int Nbins, double[][] range){
 		this.Nbins=Nbins;
 		this.minmax=range;
 	}
@@ -128,7 +128,7 @@ public class PdfEstimator {
 			//y.add(x.get(n));
 			//x[1][n]=Math.random();
 		}
-		PdfEstimator pdf=new PdfEstimator(bins);
+		PmfEstimator pdf=new PmfEstimator(bins);
 		hist=pdf.equipartition(x,bins);
 	}
 
