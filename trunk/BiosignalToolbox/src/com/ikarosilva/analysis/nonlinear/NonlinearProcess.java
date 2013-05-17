@@ -1,5 +1,7 @@
 package com.ikarosilva.analysis.nonlinear;
 
+import java.util.Random;
+
 public class NonlinearProcess {
 
 	//Nonlinear processes from :
@@ -13,6 +15,13 @@ public class NonlinearProcess {
 
 	}
 
+	public static double[] BrownianMotion(int N){
+		Random rnd=new Random(System.currentTimeMillis());
+		double[] x=new double[N];
+		for(int n=1;n<N;n++)
+			x[n]=x[n-1]+rnd.nextGaussian();
+		return x;
+	}
 	public static double[] sineMap(double x0, double b, int N){
 		double[] y=new double[N];
 		y[0]=x0;
