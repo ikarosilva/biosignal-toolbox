@@ -45,7 +45,7 @@ public class PmfEstimator {
 		double[] unitScale= new double[M];
 		double[] offset= new double[M];
 		int key; 
-		int[] rnd= new int[M];
+		int binIndex=0;
 		int[] mapDim=new int[M];
 		Double tmp;
 		HashMap<Integer,Double> pdf=new HashMap<Integer,Double>();
@@ -72,7 +72,7 @@ public class PmfEstimator {
 			mapDim[i]=(int) Math.pow(Nbins,M-i-1);
 			System.out.println("Dim " + i +" : range= " + range[i]
 					+ " step= " + step[i]+ " binScale= "+ binScale[i]
-				    + " picket= " + unitScale[i] + 
+				    + " unit= " + unitScale[i] + 
 				    " offset= " + offset[i] + " mapdim=" + mapDim[i]);
 		}
 		/*
@@ -85,16 +85,17 @@ public class PmfEstimator {
 		 */
 		double norm;
 		for(int i=0;i<samples;i++){
-			//TODO: fix picket fence issues
 			key=0;
-			
 			for(int j=0;j<M;j++){
+				//Find the bin location of the sample
 				norm=( (x[j][i]-minmax[j][0])*unitScale[j] )-offset[j];
-				rnd[j]= (int) Math.round(norm*binScale[j]);//maps a sample to a bin
-				key+= (double) mapDim[j]*rnd[j]; //using integer division to have Nbins*rnd  on all except last dimension
-				System.out.println("x[" + j + "][" + i +"]= " + x[j][i]+
-						" rnd=" + rnd[j]+ " mapDim= " + mapDim[j] +
-					    " norm= " + norm);
+				binIndex= (int) Math.round(norm*binScale[j]);
+				
+				//Use integer division to have Nbins*binIndex  
+				//on all except last dimension
+				key+= (double) mapDim[j]*binIndex; 
+				System.out.print("x[" + j + "][" + i +"]= " + x[j][i]+
+						" binIndex=" + binIndex + "   " );
 			}
 			//Map subscript to absolute index
 			System.out.println("key= "+ key);
@@ -105,18 +106,27 @@ public class PmfEstimator {
 
 		//Print HashMap
 		System.out.println("map size=" + pdf.size());
-		int[] dim=new int[M];
-		for(Integer d : pdf.keySet()){
-			System.out.print("pdf["+d+": ");
-			for(int i=0;i<M;i++){
-				//TODO: fix correction factor for higher dimensions
-				dim[i]=d/mapDim[i] - (i*Nbins);
-				System.out.print(dim[i]);
-				if(i<(M-1))
-					System.out.print(",");
+		int[] indices=new int[M];
+		for(Integer thisKey : pdf.keySet()){
+			indices[0]=(int) Math.floor(thisKey/mapDim[0]);
+			System.out.print
+			( thisKey + " / " + mapDim[0] +" =" + indices[0] + " -> ");
+			for(int i=1;i<M;i++){
+				indices[i]=thisKey;
+				for(int k=0;k<i;k++){
+					System.out.println
+					( thisKey + " - " +indices[k] + "*" + mapDim[k]);
+					indices[i]-=indices[k]*mapDim[k];
+				}
+				
 			}
-			System.out.println("]=" + pdf.get(d));
+			System.out.print("pdf[ " + thisKey +" : ");
+			for(int j=0;j<M;j++){
+				System.out.print(indices[j] + " ");
+			}
+			System.out.println("] = " + pdf.get(thisKey));
 		}
+		
 		return pdf;
 
 	}
