@@ -6,10 +6,12 @@ public class PmfEstimator {
 
 
 	//px : 1 column= probability, 2nd column lower bound, 3rd column upper bound
-	private double[][] pdf;
+	private double[][] pmf;
+	private HashMap<Integer,Double> pmfHashMap;
 	private int Nbins;
 	private int M;
 	private double[][] minmax; //minimum and maximum values for bins (ie, range)
+	int[] mapDim;
 
 	public PmfEstimator(){
 		Nbins=0;
@@ -35,7 +37,7 @@ public class PmfEstimator {
 		return minMax;
 	}
 
-	public HashMap<Integer, Double> equipartition(double[][] x, int N){
+	public void equipartition(double[][] x, int N){
 		M=x.length;
 		int samples=x[0].length;
 		double wcount= (double) 1/samples;
@@ -46,16 +48,12 @@ public class PmfEstimator {
 		double[] offset= new double[M];
 		int key; 
 		int binIndex=0;
-		int[] mapDim=new int[M];
+		pmfHashMap=new HashMap<Integer,Double>();
+		mapDim=new int[M];
 		Double tmp;
-		HashMap<Integer,Double> pdf=new HashMap<Integer,Double>();
-
-
-
 		//Initialize parameters for the the pmf
 		if(Nbins ==0)
 			Nbins=N;
-
 		if(minmax == null){
 			minmax=new double[M][2];
 			for(int i=0;i<M;i++)
@@ -70,10 +68,6 @@ public class PmfEstimator {
 			unitScale[i]=(minmax[i][1]+step[i])/minmax[i][1];
 			offset[i]=(double)step[i]/2;
 			mapDim[i]=(int) Math.pow(Nbins,M-i-1);
-			System.out.println("Dim " + i +" : range= " + range[i]
-					+ " step= " + step[i]+ " binScale= "+ binScale[i]
-				    + " unit= " + unitScale[i] + 
-				    " offset= " + offset[i] + " mapdim=" + mapDim[i]);
 		}
 		/*
 		Create HashMap to store bin locations of X1 , X2,...XM
@@ -90,62 +84,56 @@ public class PmfEstimator {
 				//Find the bin location of the sample
 				norm=( (x[j][i]-minmax[j][0])*unitScale[j] )-offset[j];
 				binIndex= (int) Math.round(norm*binScale[j]);
-				
 				//Use integer division to have Nbins*binIndex  
 				//on all except last dimension
 				key+= (double) mapDim[j]*binIndex; 
-				System.out.print("x[" + j + "][" + i +"]= " + x[j][i]+
-						" binIndex=" + binIndex + "   " );
 			}
 			//Map subscript to absolute index
-			System.out.println("key= "+ key);
-			tmp=pdf.get(key);
+			tmp=pmfHashMap.get(key);
 			tmp=(tmp == null) ? wcount:tmp+wcount;
-			pdf.put(key,tmp);
+			pmfHashMap.put(key,tmp);
 		}
+	}
 
-		//Print HashMap
-		System.out.println("map size=" + pdf.size());
-		int[] indices=new int[M];
-		for(Integer thisKey : pdf.keySet()){
-			indices[0]=(int) Math.floor(thisKey/mapDim[0]);
-			System.out.print
-			( thisKey + " / " + mapDim[0] +" =" + indices[0] + " -> ");
-			for(int i=1;i<M;i++){
-				indices[i]=thisKey;
-				for(int k=0;k<i;k++){
-					System.out.println
-					( thisKey + " - " +indices[k] + "*" + mapDim[k]);
-					indices[i]-=indices[k]*mapDim[k];
-				}
-				
-			}
-			System.out.print("pdf[ " + thisKey +" : ");
+	public void printHashMap(){
+		int[] indices;
+		for(Integer thisKey : pmfHashMap.keySet()){
+			indices=sub2Indices(thisKey);
+			System.out.print("pmf[ " + thisKey + " : ");
 			for(int j=0;j<M;j++){
 				System.out.print(indices[j] + " ");
 			}
-			System.out.println("] = " + pdf.get(thisKey));
+			System.out.println(" ]=" + pmfHashMap.get(thisKey));
 		}
-		
-		return pdf;
-
 	}
 
+	public int[] sub2Indices(Integer sub){
+		int[] indices=new int[M];
+		indices[0]=(int) Math.floor(sub/mapDim[0]);
+		for(int i=1;i<M;i++){
+			indices[i]=sub;
+			for(int k=0;k<i;k++)
+				indices[i]-=indices[k]*mapDim[k];
+		}
+		return indices;
+	}
 
+	
 	public static void main(String[] args) {
-
 		//Test the histogram estimation
 		ArrayList<Double> y= new ArrayList<Double>();
 		HashMap<Integer,Double> hist;
-		int samples=16, bins=4;
+		int bins=5;
+		int samples=bins*10;
 		int dim=2;
 		double[][] x= new double[dim][samples];
 		for(int n=0;n<samples;n++){
 			for(int d=0;d<dim;d++)
 				x[d][n]=n;
 		}
-		PmfEstimator pdf=new PmfEstimator(bins);
-		hist=pdf.equipartition(x,bins);
+		PmfEstimator pmf=new PmfEstimator(bins);
+		pmf.equipartition(x,bins);
+		pmf.printHashMap();
 	}
 
 }
