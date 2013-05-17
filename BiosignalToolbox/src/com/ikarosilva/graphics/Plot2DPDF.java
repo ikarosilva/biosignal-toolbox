@@ -38,24 +38,15 @@ import com.ikarosilva.statistics.BinomialGaussianPdf;
 
 class PDFXYZDataset implements XYZDataset {
 	private double[][] data;
-	public PDFXYZDataset(double[][] data) {
-
+	public PDFXYZDataset(double[][] data, Double scale) {
 		//normalize the data by maximum  value
-		double max=0;
 		this.data=data;
-		for(int i=0;i<2;i++){
-			for(int k=0;k<data[0].length;k++)
-				max=(max<data[i][k]) ? data[i][k]:max;  
-		}
-		if(max !=0){
+		if(scale != 1){
 			for(int i=0;i<2;i++){
-				for(int k=0;k<data[0].length;k++){
-					this.data[i][k]=data[i][k]/max;
-					System.out.println(this.data[i][k]);
-				}
+				for(int k=0;k<data[0].length;k++)
+					this.data[i][k]=data[i][k]/scale;
 			}
 		}
-
 	}
 	public int getSeriesCount() {
 		return 1;
@@ -67,13 +58,13 @@ class PDFXYZDataset implements XYZDataset {
 		return new Double(getXValue(series, item));
 	}
 	public double getXValue(int series, int item) {
-		return (item%data[0].length);
+		return Math.floor(item/data[0].length);
 	}
 	public Number getY(int series, int item) {
 		return new Double(getYValue(series,item));
 	}
 	public double getYValue(int series, int item) {
-		return Math.floor(item/data[0].length);
+		return item%data[0].length;
 	}
 	public Number getZ(int series, int item) {
 		return new Double(getZValue(series, item));
@@ -108,9 +99,9 @@ class PDFXYZDataset implements XYZDataset {
 
 public class Plot2DPDF extends ApplicationFrame {
 
-	public Plot2DPDF(String title, double[][] data) {
+	public Plot2DPDF(String title, double[][] data,double scale) {
 		super(title);
-		JPanel chartPanel = createDemoPanel(data);
+		JPanel chartPanel = createDemoPanel(data,scale);
 		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
 		setContentPane(chartPanel);
 	}
@@ -130,7 +121,7 @@ public class Plot2DPDF extends ApplicationFrame {
 		yAxis.setAxisLinePaint(Color.white);
 		yAxis.setTickMarkPaint(Color.white);
 		XYBlockRenderer renderer = new XYBlockRenderer();
-		PaintScale scale = new GrayPaintScale(-2.0, 1.0);
+		PaintScale scale = new GrayPaintScale(0, 1.0);
 		renderer.setPaintScale(scale);
 		XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
 		plot.setBackgroundPaint(Color.lightGray);
@@ -160,12 +151,12 @@ public class Plot2DPDF extends ApplicationFrame {
 		return chart;
 	}
 
-	private static XYZDataset createDataset(double[][] data) {
-		return new PDFXYZDataset(data);
+	private static XYZDataset createDataset(double[][] data, double scale) {
+		return new PDFXYZDataset(data,scale);
 	}
 
-	public static JPanel createDemoPanel(double[][] data) {
-		return new ChartPanel(createChart(createDataset(data)));
+	public static JPanel createDemoPanel(double[][] data,double scale) {
+		return new ChartPanel(createChart(createDataset(data,scale)));
 	}
 
 	public static void main(String[] args) {
@@ -176,7 +167,7 @@ public class Plot2DPDF extends ApplicationFrame {
 				new BinomialGaussianPdf(mx,my,stdx,stdy,p);
 		double[][] z= normalPdf.eval(N);
 		Plot2DPDF demo = new Plot2DPDF(
-				"PDF",z);
+				"PDF",z,1);
 		demo.pack();
 		RefineryUtilities.centerFrameOnScreen(demo);
 		demo.setVisible(true);
