@@ -10,6 +10,7 @@ public class EmbeddedModeling {
 	 private int tau; //delay
 	 private double[] data;
 	 private double[][] distance; //Square matrix of state distances
+	 private String distanceNorm; //Stores the type of norm used to est distance
 	 
 	public double[][] getMaxNormDistance(int tau, int M){
 		//Calculates distance between vectors
