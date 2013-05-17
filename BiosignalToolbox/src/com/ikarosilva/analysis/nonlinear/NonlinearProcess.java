@@ -57,6 +57,19 @@ public class NonlinearProcess {
 		return y;
 	}
 
+	public static double[] modelOne(int N){
+		double[] data=new double[N];
+		double[] x=new double[2];
+		double A=4, p=0.95, sigma=2;
+		Random rnd= new Random(System.currentTimeMillis());
+		for(int i=0;i<N;i++){
+			x[1]=A + p*x[0];
+			x[0]=x[1];
+			data[i]=x[1] + rnd.nextGaussian()*sigma;
+		}
+		return data;
+		
+	}
 	public static double[] Conway(int N) {
 		double[] output= new double[N];
 		int[] a = new int[N];
