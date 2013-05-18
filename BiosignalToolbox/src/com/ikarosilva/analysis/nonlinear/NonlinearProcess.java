@@ -3,6 +3,7 @@ package com.ikarosilva.analysis.nonlinear;
 import java.util.Arrays;
 import java.util.Random;
 import com.ikarosilva.graphics.Plot;
+import com.ikarosilva.graphics.ScatterPlot;
 import com.ikarosilva.statistics.General;
 
 public class NonlinearProcess {
@@ -85,6 +86,51 @@ public class NonlinearProcess {
 		
 	}
 	
+	public static double[] modelThree(int N){
+		double[] data=new double[N];
+		double a=0.5, b=3, T=0.1, sig1=1,sig2=3;
+		double x=0, y=0, dx=0, dy=0;
+		Random rnd1= new Random(System.currentTimeMillis());
+		Random rnd2= new Random(System.currentTimeMillis()*3);
+		for(int i=0;i<N;i++){
+			dx=y + rnd2.nextGaussian()*sig2;
+			dy=-a*y - b*x;
+			x=dx*T +x;
+			y=dy*T +y;
+			data[i]=x + rnd1.nextGaussian()*sig1; 
+		}
+		return data;
+	}
+	
+	public static double[] modelFour(int N){
+		double[] data=new double[N];
+		double u=4;
+		data[0]=0.2;
+		for(int n=1;n<N;n++)
+			data[n]=u*data[n-1]*(1-data[n-1]);
+		return data;
+	}
+	
+	public static double[] modelFive(int N){
+		double[] data=new double[N];
+		double xd=0,x=0,y=0, yd=0, 
+				z=0, sig1=0.1, m=0, 
+				u=0.7, b=0.3, sig2=0.05;
+		Random rnd1= new Random(System.currentTimeMillis());
+		Random rnd2= new Random(System.currentTimeMillis());
+		for(int n=0;n<N;n++){
+			m=0.4 - (6/(1+ x*x + y*y));
+			yd=y;
+			xd=x;
+			y=u*(xd*Math.sin(m) + yd*Math.cos(m));
+			x=1 + u*(xd*Math.cos(m) - yd*Math.sin(m)) + 0.2*z;
+			z=1.4 + 0.3*rnd1.nextGaussian()*sig1-z*z;
+			data[n]=x + b*z + rnd2.nextGaussian()*sig2;
+			System.out.println(data[n]);
+		}
+		return data;
+	}
+	
 	public static double[] Conway(int N) {
 		double[] output= new double[N];
 		int[] a = new int[N];
@@ -103,17 +149,12 @@ public class NonlinearProcess {
 
 	
 	public static void main(String[] args) {
-		int N=1000;
-		double[] data= modelTwo(N);
-		Plot plt= new Plot("Model One",data);
-		double[] d0=Arrays.copyOfRange(data,0,N-2);
-		double[] d1=Arrays.copyOfRange(data,1,N-1);
-		try {
-			System.out.println("p=" + General.corrcoeff(d0,d1));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+		int N=100;
+		double[] data= modelFive(N);
+		Plot plt= new Plot("",data);
+		ScatterPlot sct = new 
+				ScatterPlot("",Arrays.copyOfRange(data,0,N-2),
+						Arrays.copyOfRange(data,1,N-1));
 	}
 
 }

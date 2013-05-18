@@ -1,7 +1,25 @@
 package com.ikarosilva.statistics;
 
+import java.util.Arrays;
+
 public class General {
 
+	public static double[] autocorr(double[] x, int M) {
+		int N=x.length;
+		if(M==0)
+			M=(int)N/20;
+		double[] R=new double[M];
+		for(int m=0;m<M;m++){
+			try {
+				R[m]=corrcoeff(
+						Arrays.copyOfRange(x,0,N-1-m),
+						Arrays.copyOfRange(x,m,N-1))/(N-m);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return R;
+	}
 	public static double corrcoeff(double[] x, double[] y) throws Exception{
 		if(x.length != y.length)
 			throw new Exception("Array size do not match!");
