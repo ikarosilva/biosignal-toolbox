@@ -12,6 +12,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.ApplicationFrame;
+import org.jfree.ui.RefineryUtilities;
 
     public class Plot extends ApplicationFrame {
 
@@ -22,6 +23,9 @@ import org.jfree.ui.ApplicationFrame;
             JPanel chartPanel = createDemoPanel(timeSeries);
             chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
             setContentPane(chartPanel);
+    		this.pack();
+    		RefineryUtilities.centerFrameOnScreen(this);
+    		this.setVisible(true);
         }
        
       

@@ -1,6 +1,9 @@
 package com.ikarosilva.analysis.nonlinear;
 
+import java.util.Arrays;
 import java.util.Random;
+import com.ikarosilva.graphics.Plot;
+import com.ikarosilva.statistics.General;
 
 public class NonlinearProcess {
 
@@ -59,17 +62,29 @@ public class NonlinearProcess {
 
 	public static double[] modelOne(int N){
 		double[] data=new double[N];
-		double[] x=new double[2];
-		double A=4, p=0.95, sigma=2;
+		double A=4, p=0.95, sigma=2, x=80;
 		Random rnd= new Random(System.currentTimeMillis());
 		for(int i=0;i<N;i++){
-			x[1]=A + p*x[0];
-			x[0]=x[1];
-			data[i]=x[1] + rnd.nextGaussian()*sigma;
+			x=A + p*x;
+			data[i]= x+rnd.nextGaussian()*sigma;
 		}
 		return data;
 		
 	}
+	
+	public static double[] modelTwo(int N){
+		double[] data=new double[N];
+		double A=4, p=0.95, sig1=2,sig2=3, x=80;
+		Random rnd1= new Random(System.currentTimeMillis());
+		Random rnd2= new Random(System.currentTimeMillis()*3);
+		for(int i=0;i<N;i++){
+			x=A + p*x + rnd2.nextGaussian()*sig2;
+			data[i]= x+rnd1.nextGaussian()*sig1;
+		}
+		return data;
+		
+	}
+	
 	public static double[] Conway(int N) {
 		double[] output= new double[N];
 		int[] a = new int[N];
@@ -86,5 +101,19 @@ public class NonlinearProcess {
 
 	}
 
+	
+	public static void main(String[] args) {
+		int N=1000;
+		double[] data= modelTwo(N);
+		Plot plt= new Plot("Model One",data);
+		double[] d0=Arrays.copyOfRange(data,0,N-2);
+		double[] d1=Arrays.copyOfRange(data,1,N-1);
+		try {
+			System.out.println("p=" + General.corrcoeff(d0,d1));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
 
 }
