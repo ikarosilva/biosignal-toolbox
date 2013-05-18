@@ -91,6 +91,9 @@ public class ScatterPlot extends ApplicationFrame {
 		renderer.setSeriesPaint(0, Color.blue);
 		renderer.setSeriesShape(0, cross);
 		
+		this.pack();
+		RefineryUtilities.centerFrameOnScreen(this);
+		this.setVisible(true);
 	}
 
 	public ScatterPlot(String title, double[] x,double[] y) {
@@ -122,6 +125,9 @@ public class ScatterPlot extends ApplicationFrame {
 		renderer.setSeriesPaint(0, Color.blue);
 		renderer.setSeriesShape(0, cross);
 		
+		this.pack();
+		RefineryUtilities.centerFrameOnScreen(this);
+		this.setVisible(true);
 	}
 
 	public ScatterPlot(String title, double[] x,double[] y, double[] z) {
@@ -158,6 +164,10 @@ public class ScatterPlot extends ApplicationFrame {
 		renderer.setSeriesPaint(1, Color.red);
 		renderer.setSeriesShape(0, cross);
 		
+		
+		this.pack();
+		RefineryUtilities.centerFrameOnScreen(this);
+		this.setVisible(true);
 	}
 	
 	public static void main(String[] args) {
@@ -170,9 +180,6 @@ public class ScatterPlot extends ApplicationFrame {
 		int x= Integer.valueOf(args[1]);
 		int y= Integer.valueOf(args[2]);
 		ScatterPlot demo = new ScatterPlot(datafile.toString(), datafile, x, y);
-		demo.pack();
-		RefineryUtilities.centerFrameOnScreen(demo);
-		demo.setVisible(true);
 	}
 
 }
