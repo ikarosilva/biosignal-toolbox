@@ -1,5 +1,6 @@
 package com.ikarosilva.statistics;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class General {
@@ -20,11 +21,29 @@ public class General {
 		}
 		return R;
 	}
+	
+	public static double var(ArrayList<Double> x){
+		double[] y=new double[x.size()];
+		for(int n=0;n<x.size();n++)
+			y[n]=x.get(n);
+		return General.var(y);
+	}
+	
+	public static double var(double[] x){
+		double mx=0, sigma=0;
+		for(int n=0;n<x.length;n++)
+			mx+=x[n];
+		mx=mx/x.length;
+		for(int n=0;n<x.length;n++)
+			sigma+=(x[n]-mx)*(x[n]-mx);
+		return sigma/x.length;
+	}
+
 	public static double corrcoeff(double[] x, double[] y) throws Exception{
 		if(x.length != y.length)
 			throw new Exception("Array size do not match!");
 		double p=Double.NaN;
-		
+
 		//Estimate mean from dataset
 		int N=x.length;
 		double mx=0, my=0;
@@ -34,7 +53,7 @@ public class General {
 		}
 		mx=mx/N;
 		my=my/N;
-		
+
 		//Estimate corrcoeff from variance
 		double Sxy=0, Sxx=0, Syy=0;
 		for(int n=0;n<N;n++){

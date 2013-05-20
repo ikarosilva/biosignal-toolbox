@@ -1,11 +1,14 @@
 package com.ikarosilva.analysis.nonlinear;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.optimization.fitting.CurveFitter;
 import org.apache.commons.math3.optimization.general.GaussNewtonOptimizer;
 import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
+
+import com.ikarosilva.statistics.General;
 
 public class EmbeddedModeling {
 
@@ -29,6 +32,10 @@ public class EmbeddedModeling {
 		step=1;//Step size between state vectors (in sample) in order to avoid local similarities
 	}
 
+	public void setData(double[] data){
+		this.data=data;
+		N=data.length;
+	}
 	public double[][] getNormDistance(int tau, int M){
 		//Calculates distance between vectors
 		double[][] dist =new double[M][];
@@ -114,6 +121,53 @@ public class EmbeddedModeling {
 		return dist;
 	}
 
+	public double[] predictivePower(double[] timeSeries,int M, double th, double[] neighborSize){
+			double[] err=new double[neighborSize.length];
+			for(int i=0;i<neighborSize.length;i++)
+				err[i]=predictivePower(timeSeries,M,th,neighborSize[i]);
+			return err;
+	}
+	
+	public double predictivePower(double[] timeSeries,int M, double th,	double neighborSize){
+		/*
+		 * Estimates the predictive power of the time series by calculating the 
+		 * error ratio between the embedded model of size M and variance of the time series 
+		 */
+		int n, k, m;
+		double[] tmpData=new double[timeSeries.length-1];
+		double[] v1= new double[M];
+		double future=0;
+		boolean applyWeight=false; //otherwise there will be always be a vector very close biasing results!
+		ArrayList<Double> err= new ArrayList<Double>();
+		err.ensureCapacity(timeSeries.length);
+		
+		for(n=(M-1)*tau;n<timeSeries.length-1;n=n+step){
+			//Generate truncate time-series with the value to predict removed
+			for(k=0;k<tmpData.length;k++){
+				if(k != n)
+					tmpData[k]=timeSeries[k];
+			}
+			//Get the vector to match and its future value
+			for(m=n;m>=(n-M+1);m--)
+				v1[m]=timeSeries[n-(n-m)*tau];
+			future=timeSeries[n+1];
+			
+			//Reset the data
+			this.setData(tmpData);
+			
+			//Get the prediction
+			try {
+				err.add(future-this.predict(v1,th,neighborSize,applyWeight));
+			} catch (Exception e) {
+				System.err.println("Non-valid prediction...skipping sample");
+			}
+		}
+		
+		//return ratio of variance
+		return General.var(err)/General.var(timeSeries);
+		
+	}
+	
 	public double predict(double[] x, double th, double neighborSize, boolean applyWeight) throws Exception{
 		//Find history that matches current state and average them to find the future
 		//with neighborhood limit of neighborSize
@@ -244,7 +298,7 @@ public class EmbeddedModeling {
 		return (double) num/den;	
 	}
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		//TODO Auto-generated method stub
 
 	}
 
