@@ -3,6 +3,7 @@ package com.ikarosilva.analysis.nonlinear;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.optimization.fitting.CurveFitter;
 import org.apache.commons.math3.optimization.general.GaussNewtonOptimizer;
+import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
 
 public class EmbeddedModeling {
 
@@ -32,66 +33,70 @@ public class EmbeddedModeling {
 		double[] v= new double[M.length];
 		double[] best;
 		double[] init = { 1, 1}; // a - bx
-		PolynomialFunction fitted;
-		CurveFitter fitter = new CurveFitter(new GaussNewtonOptimizer());				
-		for(int i=0;i<threshold.length;i++){
-			for(int m=0;m<M.length;m++){
+		CurveFitter fitter = new CurveFitter(new LevenbergMarquardtOptimizer());
+		for(int m=0;m<M.length;m++){
+			for(int i=0;i<threshold.length;i++){
 				fitter.addObservedPoint(Math.log(threshold[i]),
 						Math.log(correlationIntegral(data,threshold[i],M[m])));
-				System.out.println(Math.log(threshold[i]) + " " +
-						Math.log(correlationIntegral(data,threshold[i],M[m])));
 			}
+			System.out.println("done= " + M[m]);
 			// Compute optimal coefficients.
 			best = fitter.fit(new PolynomialFunction.Parametric(), init);
 			// Construct the polynomial that best fits the data.
-			fitted = new PolynomialFunction(best);
-			v[i]=fitted.getCoefficients()[1];
+			v[m]=best[1];
+			System.out.println("M= " + m + "\tslope= " + v[m]);
 		}
 		return v;
 	}
 
+	public double[] correlationIntegral(double[] data, double[] threshold, int M){
+		double[] v= new double[threshold.length];
+		for(int i=0;i<threshold.length;i++){
+			v[i]=correlationIntegral(data,threshold[i],M);
+			System.out.println(threshold[i] + " ->" + v[i]);
+		}
+		return v;
+	}
 
 	public double correlationIntegral(double[] data, double threshold, int M){
 		//Calculate the correlation integral of the time series
 		//based on equation 6.34 (pg 317) of Kaplan
-		int N=data.length, n, m, k, dist;
+		int N=data.length, n, m, k, count=0;
 		int endPoint=(N-1) - (M-1)*tau+step;
-		double Corr=0;
+		double Corr=0, dist;
 		for(n=0;n<(endPoint-(M-1)*tau-step);n=n+step){
-			dist=0;
-			//System.out.println("tau= " + tau + "\tdata[ " + n +" ]=" + data[n]);
 			for(k=n+(M-1)*tau+step;k<endPoint;k++){
+				dist=0;
 				for(m=0;m<M;m++){
-					//System.out.println( "k= " + k + " m= " + m +
-					//		"\tdata[ " + (n+m*tau) + " ]= " + data[n+m*tau] +
-					//		"\tdata[ " + (k+m*tau) + " ]= " + data[k+m*tau]); 
 					switch (norm) {
 					case MAX:
 						dist+=Math.abs(data[n+m*tau]-data[k+m*tau]);
 						break;                
 					case EUCLIDEAN:
-						dist+=Math.sqrt(data[n+m*tau]*data[n+m*tau]-data[k+m*tau]*data[k+m*tau]);
+						dist+=Math.sqrt((data[n+m*tau]-data[k+m*tau])*(data[n+m*tau]-data[k+m*tau]));
 						break;                     
 					default:
 						System.out.println("Unknown norm");			
 					}
+					count++;
 				}
-				//If within tolerance, average future value
+				//If within tolerance, increment neighbor count
 				if(dist<threshold)
 					Corr++;
 			}
+
 		}
-		return Corr/(N*N-N);
+		return Corr/count;
 	}
 
 
 
 	public double predict(double[] data, double[] x, int M, double th) throws Exception{
 		//Find history that matches current state and average them to find the future
-		
+
 		//TODO: Fix so that this part is similar to that of the Correlation Integral 
-		double y= 0;
-		int n, m, dist, aveN=1, N= data.length; 
+		double y= 0, dist;
+		int n, m, aveN=1, N= data.length; 
 		if(x.length != M)
 			throw new Exception("Prediction vector must be of size " + M);
 
