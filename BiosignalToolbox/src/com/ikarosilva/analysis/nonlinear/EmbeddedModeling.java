@@ -121,14 +121,14 @@ public class EmbeddedModeling {
 		return dist;
 	}
 
-	public double[] predictivePower(double[] timeSeries,int M, double th, double[] neighborSize){
+	public double[] predictivePower(double[] timeSeries,int M, double th, int[] neighborSize){
 			double[] err=new double[neighborSize.length];
 			for(int i=0;i<neighborSize.length;i++)
 				err[i]=predictivePower(timeSeries,M,th,neighborSize[i]);
 			return err;
 	}
 	
-	public double predictivePower(double[] timeSeries,int M, double th,	double neighborSize){
+	public double predictivePower(double[] timeSeries,int M, double th,	int neighborSize){
 		/*
 		 * Estimates the predictive power of the time series by calculating the 
 		 * error ratio between the embedded model of size M and variance of the time series 
@@ -148,8 +148,10 @@ public class EmbeddedModeling {
 					tmpData[k]=timeSeries[k];
 			}
 			//Get the vector to match and its future value
-			for(m=n;m>=(n-M+1);m--)
+			for(m=n;m>=(n-M+1);m--){
+				System.out.println((n-(n-m)*tau) + "\t" + n);
 				v1[m]=timeSeries[n-(n-m)*tau];
+			}
 			future=timeSeries[n+1];
 			
 			//Reset the data
@@ -168,7 +170,7 @@ public class EmbeddedModeling {
 		
 	}
 	
-	public double predict(double[] x, double th, double neighborSize, boolean applyWeight) throws Exception{
+	public double predict(double[] x, double th, int neighborSize, boolean applyWeight) throws Exception{
 		//Find history that matches current state and average them to find the future
 		//with neighborhood limit of neighborSize
 		double y= 0, dist;
@@ -216,25 +218,35 @@ public class EmbeddedModeling {
 
 		if(count < (neighborSize/10))
 			throw new Exception("Neighboorhood size is too small for prediction: " + count);
-		if(count != neighborSize)
+		if(count < neighborSize)
 			System.err.println("Neighboorhood size is: " + count +" , expected :" + neighborSize);
 
+		int maxVal=0;
+		if(count>neighborSize){
+			maxVal=neighborSize;
+			//Sort the array and the the closest neighbors
+			//double[] sorted=new double[neighborSize];
+			//TODO: add sort rows method and convert nb data to double[][]
+		}else{
+			maxVal=count;
+		}
+		
 		if(applyWeight){
 			//Apply weight inversely proportional to distance
-			double[] weights = new double[count];
+			double[] weights = new double[maxVal];
 			double sumWeight=0;
-			for(n=0;n<count;n++){
+			for(n=0;n<maxVal;n++){
 				weights[n]=1/neighboorDist[n];
 				sumWeight+=weights[n];
 			}
 			//Scale so that weights sum to one apply the weighted averaging 
-			for(n=0;n<count;n++){
+			for(n=0;n<maxVal;n++){
 				weights[n]=weights[n]/sumWeight;
 				y+= weights[n]*neighboorFuture[n];
 			}			
 		}else{
 			//Get average over the neighborhood
-			for(n=0;n<count;n++)
+			for(n=0;n<maxVal;n++)
 				y=(n*y + neighboorFuture[n])/(n+1);
 		}
 

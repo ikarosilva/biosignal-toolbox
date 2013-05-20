@@ -163,7 +163,7 @@ public class NonlinearProcess {
 		double[] data= modelOne(N);
 		double th=1;
 		int M=1;
-		double[] neighborSize= {1,2,3,4,5,6,7,8,9,10,
+		int[] neighborSize= {1,2,3,4,5,6,7,8,9,10,
 								12,15,20,25,30,35,40,45,
 								50,55,60,65,70,75,80};
 		double [] v = new double[neighborSize.length];
