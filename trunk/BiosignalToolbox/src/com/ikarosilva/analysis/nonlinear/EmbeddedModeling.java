@@ -1,5 +1,7 @@
 package com.ikarosilva.analysis.nonlinear;
 
+import java.util.ArrayList;
+
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.optimization.fitting.CurveFitter;
 import org.apache.commons.math3.optimization.general.GaussNewtonOptimizer;
@@ -35,14 +37,14 @@ public class EmbeddedModeling {
 
 	public double[] estimateDimension(double[] threshold, int[] M){
 		/*
-		Assumptions: One of the hardest task is chossing the appropiate range 
+		Assumptions: One of the hardest task is choosing the appropiate range 
 		for the threshold value (ie, the "scaling region"). A value too small
 		will yield very high slope variability between the embedded dimension due to measurement noise. A
 		value of th too high will have embedded dimensions slopes to converge to 0.
-		
+
 		  Moreover, the slope estimation should be really done manually for segmenting the initial transition
-		  from the steady state behaviour (ie, determining the kneepoint of the correlation curve).
-		*/
+		  from the steady state behaviour (ie, determining the knee-point of the correlation curve).
+		 */
 		double[] v= new double[M.length];
 		double[] best;
 		double corr=0;
@@ -76,22 +78,16 @@ public class EmbeddedModeling {
 		int n, m, k, count=0;
 		int endPoint=(N-1) - (M-1)*tau+step;
 		double Corr=0, dist;
+		double[] v1= new double[M];
+		double[] v2= new double[M];
 		for(n=0;n<(endPoint-(M-1)*tau-step);n=n+step){
 			for(k=n+(M-1)*tau+step;k<endPoint;k++){
-				dist=0;
 				for(m=0;m<M;m++){
-					switch (norm) {
-					case MAX:
-						dist+=Math.abs(data[n+m*tau]-data[k+m*tau]);
-						break;                
-					case EUCLIDEAN:
-						dist+=Math.sqrt((data[n+m*tau]-data[k+m*tau])*(data[n+m*tau]-data[k+m*tau]));
-						break;                     
-					default:
-						System.out.println("Unknown norm");			
-					}
-					count++;
+					v1[m]=data[n+m*tau];
+					v2[m]=data[k+m*tau];
 				}
+				dist=getDistance(v1,v2);	
+				count++;
 				//If within tolerance, increment neighbor count
 				if(dist<threshold)
 					Corr++;
@@ -101,38 +97,117 @@ public class EmbeddedModeling {
 	}
 
 
+	public double getDistance(double[] v1, double[] v2){
+		double dist=0;
+		for(int m=0;m<v1.length;m++){
+			switch (norm) {
+			case MAX:
+				dist+=Math.abs(v1[m]-v2[m]);
+				break;                
+			case EUCLIDEAN:
+				dist+=Math.sqrt((v1[m]-v2[m])*(v1[m]-v2[m]));
+				break;                     
+			default:
+				System.out.println("Unknown norm");			
+			}
+		}
+		return dist;
+	}
 
-	public double predict(double[] x, int M, double th) throws Exception{
+	public double predict(double[] x, double th, double neighborSize, boolean applyWeight) throws Exception{
 		//Find history that matches current state and average them to find the future
-
-		//TODO: Fix so that this part is similar to that of the Correlation Integral 
+		//with neighborhood limit of neighborSize
 		double y= 0, dist;
-		int n, m, aveN=1; 
-		if(x.length != M)
-			throw new Exception("Prediction vector must be of size " + M);
+		int n, m,k, count=0; 
+		int M=x.length;
+		double[] v1=new double[M];
+		int bufferSize=Math.round(N/4);
+		double[] neighboorDist= new double[bufferSize]; 
+		double[] neighboorFuture= new double[bufferSize];
+		double max=Double.MIN_VALUE;
+		int maxInd=0;
+		if(neighborSize > bufferSize)
+			throw new Exception("Neighboorhood size must be smaller than:" + (N/4));
 
 		for(n=0;n<N-1;n=n+step){
-			//Estimate distance of current state vector and input
-			dist=0;
-			for(m=0;m<M;m++){
-				switch (norm) {
-				case MAX:
-					dist+=Math.abs(x[m]-data[n+m*tau]);
-					break;                
-				case EUCLIDEAN:
-					dist+=Math.sqrt(x[m]*x[m]-data[n+m*tau]*data[n+m*tau]);
-					break;                     
-				default:
-					System.out.println("Unknown norm");			
+			for(m=0;m<M;m++)
+				v1[m]=data[n+m*tau];
+			dist=getDistance(x,v1);	
+			//If within tolerance add to the neighboor hood
+			if(dist<th){
+				if(count<bufferSize){
+					neighboorDist[count]=dist;
+					neighboorFuture[count]=data[n+m*tau+1];
+					if(dist > max){
+						maxInd=count;
+						max=dist;
+					}
+					count++;
+				}else if(dist<max){
+					//Buffer is full but current value is better than what is on the buffer
+					neighboorDist[maxInd]=dist;
+					neighboorFuture[maxInd]=data[n+m*tau+1];
+					//Recalculate the max
+					max=Double.MIN_VALUE;
+					maxInd=0;
+					for(k=0;k<bufferSize;k++){
+						if(neighboorDist[k] > max){
+							max=neighboorDist[k];
+							maxInd=k;	
+						}
+					}
 				}
+			}//End of if(dist<th)
+		}
+
+		if(count < (neighborSize/10))
+			throw new Exception("Neighboorhood size is too small for prediction: " + count);
+		if(count != neighborSize)
+			System.err.println("Neighboorhood size is: " + count +" , expected :" + neighborSize);
+
+		if(applyWeight){
+			//Apply weight inversely proportional to distance
+			double[] weights = new double[count];
+			double sumWeight=0;
+			for(n=0;n<count;n++){
+				weights[n]=1/neighboorDist[n];
+				sumWeight+=weights[n];
 			}
-			//If within tolerance, average future value
-			if(dist<th)
-				y=((aveN-1)*y + data[n+M*tau+1])/aveN;
+			//Scale so that weights sum to one apply the weighted averaging 
+			for(n=0;n<count;n++){
+				weights[n]=weights[n]/sumWeight;
+				y+= weights[n]*neighboorFuture[n];
+			}			
+		}else{
+			//Get average over the neighborhood
+			for(n=0;n<count;n++)
+				y=(n*y + neighboorFuture[n])/(n+1);
 		}
 
 		return y;
 	}
+
+	public double predict(double[] x, double th) throws Exception{
+		//Find history that matches current state and average them to find the future
+		//without and neighborhood limit
+		double y= 0, dist;
+		int n, m, count=0; 
+		int M=x.length;
+		double[] v1=new double[M];
+
+		for(n=0;n<N-1;n=n+step){
+			for(m=0;m<M;m++)
+				v1[m]=data[n+m*tau];
+			dist=getDistance(x,v1);	
+			//If within tolerance get future value and est recursive mean
+			if(dist<th){
+				count++;
+				y=((count-1)*y + data[n+m*tau+1])/count;
+			}
+		}
+		return y;
+	}
+
 	public double falseNeighbour(double threshold,double sigma, int M, double th){
 		/*
 		Calculates the number of false neighbors for this model
