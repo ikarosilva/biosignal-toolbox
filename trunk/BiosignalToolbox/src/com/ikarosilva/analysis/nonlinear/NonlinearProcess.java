@@ -161,13 +161,17 @@ public class NonlinearProcess {
 	public static void main(String[] args) {
 		int N=100;
 		double[] data= modelOne(N);
-		double[] th={0.1,0.2,0.3,0.35,0.4,0.45,0.5,0.55,0.6};
-		int[] M={1,2,3,4,5,6,7,8,9,10};
-		double [] v;
-		EmbeddedModeling model= new EmbeddedModeling(data,1,EmbeddedModeling.Norm.EUCLIDEAN);
+		double th=1;
+		int M=1;
+		double[] neighborSize= {1,2,3,4,5,6,7,8,9,10,
+								12,15,20,25,30,35,40,45,
+								50,55,60,65,70,75,80};
+		double [] v = new double[neighborSize.length];
 		
-		v=model.estimateDimension(th,M);
-        //v=model.correlationIntegral(th,(int) 7);
+		EmbeddedModeling model= new EmbeddedModeling(data,1,EmbeddedModeling.Norm.EUCLIDEAN);
+		v=model.predictivePower(data,M,th,neighborSize);
+		
+        
 		Plot plt= new Plot("",v);
 		System.out.println("done!");
 		
