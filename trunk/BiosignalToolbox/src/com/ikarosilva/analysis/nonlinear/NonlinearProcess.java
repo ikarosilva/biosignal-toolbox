@@ -2,6 +2,8 @@ package com.ikarosilva.analysis.nonlinear;
 
 import java.util.Arrays;
 import java.util.Random;
+
+import com.ikarosilva.analysis.nonlinear.EmbeddedModeling.Norm;
 import com.ikarosilva.graphics.Plot;
 import com.ikarosilva.graphics.ScatterPlot;
 import com.ikarosilva.statistics.General;
@@ -161,12 +163,16 @@ public class NonlinearProcess {
 
 	
 	public static void main(String[] args) {
-		int N=100;
+		int N=10;
 		double[] data= modelFive(N);
-		Plot plt= new Plot("",data);
-		ScatterPlot sct = new 
-				ScatterPlot("",Arrays.copyOfRange(data,0,N-2),
-						Arrays.copyOfRange(data,1,N-1));
+		double[] th={0.5};
+		int[] M={1,2,3,4,5,6,7,8,9,10};
+		double [] v;
+		EmbeddedModeling model= new EmbeddedModeling(1,EmbeddedModeling.Norm.MAX);
+		
+		v=model.estimateDimension(data, th, M);
+		Plot plt= new Plot("",v);
+		
 	}
 
 }
