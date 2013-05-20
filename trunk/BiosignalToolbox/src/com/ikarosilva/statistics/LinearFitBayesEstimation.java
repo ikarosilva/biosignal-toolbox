@@ -3,13 +3,14 @@ package com.ikarosilva.statistics;
 public class LinearFitBayesEstimation {
 
 	//Based on pg 103: "Fundamentals of Kallman Filtering: A Practical Approach"
-	//Assumes uniformly sampled data (Ts=1)
+	//Assumes uniformly sampled data (Ts=1) and fits the data according to:
+	// yhat = a + b*x; (where x = 1 2 3... N)
 	int N;
 	double a, b, K1, K2, res;
 	
-	public LinearFitBayesEstimation(){
-		a=0;
-		b=0;
+	public LinearFitBayesEstimation(double a, double b){
+		this.a=a;
+		this.b=b;
 		K1=0;
 		K2=0;
 		res=0;
