@@ -111,6 +111,19 @@ public class NonlinearProcess {
 		return data;
 	}
 	
+	public static double[] bloodCell(int N){
+		double[] data=new double[N];
+		double dx=0,x=10,y=0.1, dy=0,dt=0.001;
+		for(int n=0;n<N;n++){
+			dx=(2*y/(1+ y*y) ) - x;
+			dy= x- y;
+			y=dy*dt + y;
+			x=dx*dt + x;
+			data[n]=x;
+		}
+		return data;
+	}
+	
 	public static double[] modelFive(int N){
 		double[] data=new double[N];
 		double xd=0,x=0,y=0, yd=0, 
@@ -126,7 +139,6 @@ public class NonlinearProcess {
 			x=1 + u*(xd*Math.cos(m) - yd*Math.sin(m)) + 0.2*z;
 			z=1.4 + 0.3*rnd1.nextGaussian()*sig1-z*z;
 			data[n]=x + b*z + rnd2.nextGaussian()*sig2;
-			System.out.println(data[n]);
 		}
 		return data;
 	}
