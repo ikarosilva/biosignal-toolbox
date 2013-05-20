@@ -1,5 +1,9 @@
 package com.ikarosilva.analysis.nonlinear;
 
+import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
+import org.apache.commons.math3.optimization.fitting.CurveFitter;
+import org.apache.commons.math3.optimization.general.GaussNewtonOptimizer;
+
 public class EmbeddedModeling {
 
 	public enum Norm{
@@ -7,17 +11,13 @@ public class EmbeddedModeling {
 		EUCLIDEAN
 	}
 
-	private int M; //state size of vector
-	private double th; //Neighbor threshold
 	private int tau; //delay between state samples
 	private double[][] distance; //Square matrix of state distances
 	private Norm norm; //Stores the type of norm used to test distance
 	private int step;
 
-	public EmbeddedModeling(int M, int tau, double th, Norm norm){
-		this.M=M;
+	public EmbeddedModeling(int tau, Norm norm){
 		this.tau=tau;
-		this.th=th;
 		this.norm=norm;
 		step=1;//Step size between state vectors (in sample) in order to avoid local similarities
 	}
@@ -28,15 +28,43 @@ public class EmbeddedModeling {
 		return dist;
 	}
 
-	public double correlationIntegral(double[] data, double threshold){
+	public double[] estimateDimension(double[] data, double[] threshold, int[] M){
+		double[] v= new double[M.length];
+		double[] best;
+		double[] init = { 1, 1}; // a - bx
+		PolynomialFunction fitted;
+		CurveFitter fitter = new CurveFitter(new GaussNewtonOptimizer());				
+		for(int i=0;i<threshold.length;i++){
+			for(int m=0;m<M.length;m++){
+				fitter.addObservedPoint(Math.log(threshold[i]),
+						Math.log(correlationIntegral(data,threshold[i],M[m])));
+				System.out.println(Math.log(threshold[i]) + " " +
+						Math.log(correlationIntegral(data,threshold[i],M[m])));
+			}
+			// Compute optimal coefficients.
+			best = fitter.fit(new PolynomialFunction.Parametric(), init);
+			// Construct the polynomial that best fits the data.
+			fitted = new PolynomialFunction(best);
+			v[i]=fitted.getCoefficients()[1];
+		}
+		return v;
+	}
+
+
+	public double correlationIntegral(double[] data, double threshold, int M){
 		//Calculate the correlation integral of the time series
 		//based on equation 6.34 (pg 317) of Kaplan
 		int N=data.length, n, m, k, dist;
+		int endPoint=(N-1) - (M-1)*tau+step;
 		double Corr=0;
-		for(n=0;n<N;n=n+step){
+		for(n=0;n<(endPoint-(M-1)*tau-step);n=n+step){
 			dist=0;
-			for(k=n+(M-1)*tau+step;k<N;k++){
+			//System.out.println("tau= " + tau + "\tdata[ " + n +" ]=" + data[n]);
+			for(k=n+(M-1)*tau+step;k<endPoint;k++){
 				for(m=0;m<M;m++){
+					//System.out.println( "k= " + k + " m= " + m +
+					//		"\tdata[ " + (n+m*tau) + " ]= " + data[n+m*tau] +
+					//		"\tdata[ " + (k+m*tau) + " ]= " + data[k+m*tau]); 
 					switch (norm) {
 					case MAX:
 						dist+=Math.abs(data[n+m*tau]-data[k+m*tau]);
@@ -58,8 +86,10 @@ public class EmbeddedModeling {
 
 
 
-	public double predict(double[] data, double[] x) throws Exception{
+	public double predict(double[] data, double[] x, int M, double th) throws Exception{
 		//Find history that matches current state and average them to find the future
+		
+		//TODO: Fix so that this part is similar to that of the Correlation Integral 
 		double y= 0;
 		int n, m, dist, aveN=1, N= data.length; 
 		if(x.length != M)
@@ -87,7 +117,7 @@ public class EmbeddedModeling {
 
 		return y;
 	}
-	public double falseNeighbour(double threshold,double sigma){
+	public double falseNeighbour(double threshold,double sigma, int M, double th){
 		/*
 		Calculates the number of false neighbors for this model
 		given a series of threshold values. Equation from
