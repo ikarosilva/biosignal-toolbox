@@ -16,10 +16,14 @@ public class EmbeddedModeling {
 	private double[][] distance; //Square matrix of state distances
 	private Norm norm; //Stores the type of norm used to test distance
 	private int step;
+	private double[] data;
+	private int N;
 
-	public EmbeddedModeling(int tau, Norm norm){
+	public EmbeddedModeling(double[] data,int tau, Norm norm){
 		this.tau=tau;
 		this.norm=norm;
+		this.data=data;
+		N=data.length;
 		step=1;//Step size between state vectors (in sample) in order to avoid local similarities
 	}
 
@@ -29,39 +33,47 @@ public class EmbeddedModeling {
 		return dist;
 	}
 
-	public double[] estimateDimension(double[] data, double[] threshold, int[] M){
+	public double[] estimateDimension(double[] threshold, int[] M){
+		/*
+		Assumptions: One of the hardest task is chossing the appropiate range 
+		for the threshold value (ie, the "scaling region"). A value too small
+		will yield very high slope variability between the embedded dimension due to measurement noise. A
+		value of th too high will have embedded dimensions slopes to converge to 0.
+		
+		  Moreover, the slope estimation should be really done manually for segmenting the initial transition
+		  from the steady state behaviour (ie, determining the kneepoint of the correlation curve).
+		*/
 		double[] v= new double[M.length];
 		double[] best;
+		double corr=0;
 		double[] init = { 1, 1}; // a - bx
 		CurveFitter fitter = new CurveFitter(new LevenbergMarquardtOptimizer());
 		for(int m=0;m<M.length;m++){
+			fitter.clearObservations();
 			for(int i=0;i<threshold.length;i++){
-				fitter.addObservedPoint(Math.log(threshold[i]),
-						Math.log(correlationIntegral(data,threshold[i],M[m])));
+				//System.out.println("th= " + threshold[i]+"\tm= " + M[m]);
+				corr=correlationIntegral(threshold[i],M[m]);
+				if(corr > 0 ) //Can happen if th is too small and/or M too large
+					fitter.addObservedPoint(Math.log(threshold[i]),Math.log(corr));
 			}
-			System.out.println("done= " + M[m]);
-			// Compute optimal coefficients.
+			//Compute optimal coefficients.
 			best = fitter.fit(new PolynomialFunction.Parametric(), init);
-			// Construct the polynomial that best fits the data.
 			v[m]=best[1];
-			System.out.println("M= " + m + "\tslope= " + v[m]);
 		}
 		return v;
 	}
 
-	public double[] correlationIntegral(double[] data, double[] threshold, int M){
+	public double[] correlationIntegral(double[] threshold, int M){
 		double[] v= new double[threshold.length];
-		for(int i=0;i<threshold.length;i++){
-			v[i]=correlationIntegral(data,threshold[i],M);
-			System.out.println(threshold[i] + " ->" + v[i]);
-		}
+		for(int i=0;i<threshold.length;i++)
+			v[i]=correlationIntegral(threshold[i],M);
 		return v;
 	}
 
-	public double correlationIntegral(double[] data, double threshold, int M){
+	public double correlationIntegral(double threshold, int M){
 		//Calculate the correlation integral of the time series
 		//based on equation 6.34 (pg 317) of Kaplan
-		int N=data.length, n, m, k, count=0;
+		int n, m, k, count=0;
 		int endPoint=(N-1) - (M-1)*tau+step;
 		double Corr=0, dist;
 		for(n=0;n<(endPoint-(M-1)*tau-step);n=n+step){
@@ -84,19 +96,18 @@ public class EmbeddedModeling {
 				if(dist<threshold)
 					Corr++;
 			}
-
 		}
 		return Corr/count;
 	}
 
 
 
-	public double predict(double[] data, double[] x, int M, double th) throws Exception{
+	public double predict(double[] x, int M, double th) throws Exception{
 		//Find history that matches current state and average them to find the future
 
 		//TODO: Fix so that this part is similar to that of the Correlation Integral 
 		double y= 0, dist;
-		int n, m, aveN=1, N= data.length; 
+		int n, m, aveN=1; 
 		if(x.length != M)
 			throw new Exception("Prediction vector must be of size " + M);
 
@@ -135,7 +146,6 @@ public class EmbeddedModeling {
 		 */
 		double[][] distanceM1= getNormDistance(tau,M+1);
 		int num=0, den=0, minIndex=0;
-		int N=distance[0].length;
 		double th1= sigma/threshold;
 		for(int i=0;i<N;i++){
 			//Perform search for minimum distance
