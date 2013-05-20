@@ -22,6 +22,16 @@ public class General {
 		return R;
 	}
 	
+	public static double[][] sortRows(double[][] x){
+        java.util.Arrays.sort(x, 
+                new java.util.Comparator<double[]>(){
+                    public int compare(double[] a,double[]b){
+                        return (int) (a[1]-b[1]);
+                    }
+            });
+        return x;
+	}
+	
 	public static double var(ArrayList<Double> x){
 		double[] y=new double[x.size()];
 		for(int n=0;n<x.size();n++)

@@ -178,8 +178,7 @@ public class EmbeddedModeling {
 		int M=x.length;
 		double[] v1=new double[M];
 		int bufferSize=Math.round(N/4);
-		double[] neighboorDist= new double[bufferSize]; 
-		double[] neighboorFuture= new double[bufferSize];
+		double[][] neighboor= new double[bufferSize][2]; //First column is dist, second is future
 		double max=Double.MIN_VALUE;
 		int maxInd=0;
 		if(neighborSize > bufferSize)
@@ -192,8 +191,8 @@ public class EmbeddedModeling {
 			//If within tolerance add to the neighboor hood
 			if(dist<th){
 				if(count<bufferSize){
-					neighboorDist[count]=dist;
-					neighboorFuture[count]=data[n+m*tau+1];
+					neighboor[count][0]=dist;
+					neighboor[count][1]=data[n+m*tau+1];
 					if(dist > max){
 						maxInd=count;
 						max=dist;
@@ -201,14 +200,14 @@ public class EmbeddedModeling {
 					count++;
 				}else if(dist<max){
 					//Buffer is full but current value is better than what is on the buffer
-					neighboorDist[maxInd]=dist;
-					neighboorFuture[maxInd]=data[n+m*tau+1];
+					neighboor[maxInd][0]=dist;
+					neighboor[maxInd][1]=data[n+m*tau+1];
 					//Recalculate the max
 					max=Double.MIN_VALUE;
 					maxInd=0;
 					for(k=0;k<bufferSize;k++){
-						if(neighboorDist[k] > max){
-							max=neighboorDist[k];
+						if(neighboor[k][0] > max){
+							max=neighboor[k][0];
 							maxInd=k;	
 						}
 					}
@@ -225,8 +224,7 @@ public class EmbeddedModeling {
 		if(count>neighborSize){
 			maxVal=neighborSize;
 			//Sort the array and the the closest neighbors
-			//double[] sorted=new double[neighborSize];
-			//TODO: add sort rows method and convert nb data to double[][]
+			neighboor=General.sortRows(neighboor);
 		}else{
 			maxVal=count;
 		}
@@ -236,18 +234,18 @@ public class EmbeddedModeling {
 			double[] weights = new double[maxVal];
 			double sumWeight=0;
 			for(n=0;n<maxVal;n++){
-				weights[n]=1/neighboorDist[n];
+				weights[n]=1/neighboor[n][0];
 				sumWeight+=weights[n];
 			}
 			//Scale so that weights sum to one apply the weighted averaging 
 			for(n=0;n<maxVal;n++){
 				weights[n]=weights[n]/sumWeight;
-				y+= weights[n]*neighboorFuture[n];
+				y+= weights[n]*neighboor[n][1];
 			}			
 		}else{
 			//Get average over the neighborhood
 			for(n=0;n<maxVal;n++)
-				y=(n*y + neighboorFuture[n])/(n+1);
+				y=(n*y + neighboor[n][1])/(n+1);
 		}
 
 		return y;
