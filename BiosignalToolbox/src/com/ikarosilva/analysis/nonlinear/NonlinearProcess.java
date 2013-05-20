@@ -1,12 +1,8 @@
 package com.ikarosilva.analysis.nonlinear;
 
-import java.util.Arrays;
-import java.util.Random;
 
-import com.ikarosilva.analysis.nonlinear.EmbeddedModeling.Norm;
+import java.util.Random;
 import com.ikarosilva.graphics.Plot;
-import com.ikarosilva.graphics.ScatterPlot;
-import com.ikarosilva.statistics.General;
 
 public class NonlinearProcess {
 
@@ -163,15 +159,18 @@ public class NonlinearProcess {
 
 	
 	public static void main(String[] args) {
-		int N=10;
-		double[] data= modelFive(N);
-		double[] th={0.5};
+		int N=100;
+		double[] data= modelFour(N);
+		//double[] th={0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75};
+		double[] th={0.02, 0.04, 0.08, 0.16, 0.32, 0.64};
 		int[] M={1,2,3,4,5,6,7,8,9,10};
 		double [] v;
-		EmbeddedModeling model= new EmbeddedModeling(1,EmbeddedModeling.Norm.MAX);
+		EmbeddedModeling model= new EmbeddedModeling(1,EmbeddedModeling.Norm.EUCLIDEAN);
 		
 		v=model.estimateDimension(data, th, M);
+		//v=model.correlationIntegral(data,th,10);
 		Plot plt= new Plot("",v);
+		System.out.println("done!");
 		
 	}
 
