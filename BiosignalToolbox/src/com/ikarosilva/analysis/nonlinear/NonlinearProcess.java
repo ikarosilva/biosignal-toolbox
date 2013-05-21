@@ -171,7 +171,7 @@ public class NonlinearProcess {
 	public static void main(String[] args) {
 		int N=1000;
 		double[] data= modelFour(N);
-		double th=Double.MAX_VALUE;
+		double th=General.var(data);//Double.MAX_VALUE;
 		int M=1;
 		int[] neighborSize= {1,2,3,4,5,10,20,40,60,80,100};
 		double [] v = new double[neighborSize.length];
@@ -182,8 +182,8 @@ public class NonlinearProcess {
 		Plot plt= new Plot("",neighborSize,v);
 		Plot plt2= new Plot("",data);
 		ScatterPlot sct = new
-                  ScatterPlot("",Arrays.copyOfRange(data,0,N-2),
-                                  Arrays.copyOfRange(data,1,N-1));
+                  ScatterPlot("",Arrays.copyOfRange(data,0,99),
+                                  Arrays.copyOfRange(data,1,100));
 		System.out.println("done!");
 		
 	}
