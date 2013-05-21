@@ -23,6 +23,14 @@ public class General {
 		return R;
 	}
 	
+	public static double[] diff(double[] x){
+		double[] y=new double[x.length-1];
+		for(int n=0;n<y.length;n++)
+			y[n]=x[n+1]-x[n];
+		return y;
+		
+	}
+	
 	public static double[][] sortRows(double[][] x){
 		Arrays.sort(x, new Comparator<double[]>() {
 	        public int compare(double[] o1, double[] o2) {
