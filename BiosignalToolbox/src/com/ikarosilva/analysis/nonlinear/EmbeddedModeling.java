@@ -2,6 +2,8 @@ package com.ikarosilva.analysis.nonlinear;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import com.ikarosilva.statistics.Factorial;
 import com.ikarosilva.statistics.General;
 
 public class EmbeddedModeling {
@@ -18,7 +20,7 @@ public class EmbeddedModeling {
 	private double[] data;
 	private int N;
 	public double[][] prediction;
-	public boolean localLinearPrediction;
+	public int localSlopeOrder;
 	public double lypunovExponent;
 	public boolean applyWeight;
 	
@@ -28,7 +30,7 @@ public class EmbeddedModeling {
 		this.data=data;
 		N=data.length;
 		step=1;//Step size between state vectors (in sample) in order to avoid local similarities
-		localLinearPrediction=true;
+		localSlopeOrder=Integer.MAX_VALUE;
 		applyWeight=false;
 	}
 	
@@ -36,8 +38,8 @@ public class EmbeddedModeling {
 		applyWeight=set;
 	}
 	
-	public void setlocalLinearPrediction(boolean set){
-		localLinearPrediction=set;
+	public void setLocalSlopeOrder(int set){
+		localSlopeOrder=set;
 	}
 	public void setData(double[] data){
 		this.data=data;
@@ -155,7 +157,6 @@ public class EmbeddedModeling {
 		 */
 		int n, m;
 		double[] v1= new double[M];
-		lypunovExponent=1;
 		//Use the beginning as the training data
 		double percent=0.75; //Percent of the data series to use for training
 		
@@ -182,7 +183,6 @@ public class EmbeddedModeling {
 				e.printStackTrace();
 			}
 		}
-		lypunovExponent=Math.pow(lypunovExponent,1/err.size());
 		return General.mean(err)/General.var(timeSeries);
 	}
 	
@@ -199,7 +199,10 @@ public class EmbeddedModeling {
 		double max=Double.MIN_VALUE;
 		int maxInd=0, index;
 		int endPoint=(N-1) - (M-1)*tau;
-		double intercept=0, slope=0, center=0;
+		localSlopeOrder=(localSlopeOrder>M) ? M:localSlopeOrder; 
+		double[] taylorCoeff=new double[M+1]; //coeffs for estimating local Taylor expansion
+		double intercept=0;
+		double[] dx;
 		
 		
 		if(neighborSize >= N)
@@ -266,27 +269,31 @@ public class EmbeddedModeling {
 			for(n=0;n<count;n++){
 				weights[n]=weights[n]/sumWeight;
 				index=(int) neighboor[n][1];
-				center+= weights[n]*data[index-1];
 				intercept+=weights[n]*data[index];
+				for(int c=0;c<localSlopeOrder;c++)
+					taylorCoeff[c+1]+=weights[n]*data[index-1-c];
 			}			
 		}else{
 			//Get average over the neighborhood
 			//System.out.println("\tAveraging: " + count + " points");
 			for(n=0;n<count;n++){
 				index=(int) neighboor[n][1];
-				center=(n*center + data[index-1])/(n+1);
 				intercept=(n*intercept + data[index])/(n+1);
-				
+				for(int c=0;c<localSlopeOrder;c++)
+					taylorCoeff[c+1]=(n*taylorCoeff[c+1] + data[index-1-c])/(n+1);
 			}
 		}
-		slope=intercept-center;
-		lypunovExponent=lypunovExponent*(slope);
-		if(localLinearPrediction){
-			y=intercept+slope*(x[M-1]-center);
-		}else{
-			y=intercept;
-		}
-			
+		//Calculate slope based on the average centers coeffs
+		taylorCoeff[0]=intercept;
+		y=intercept;
+		for(int c=1;c<localSlopeOrder+1;c++){
+			dx=Arrays.copyOf(taylorCoeff,c+1);
+			for(int s=0;s<c;s++)
+				dx=General.diff(dx);
+			y+=General.mean(dx)*Math.pow((taylorCoeff[1]-x[M-1]),c)/
+					Factorial.factorial(c);
+		}	
+		
 		return y;
 	}
 

@@ -174,12 +174,12 @@ public class NonlinearProcess {
 		double[] data= modelFour(N);
 		double th=Double.MAX_VALUE;
 		int M=1; //Embedding Dimension
-		int[] neighborSize= {9};//;,2,3,4,5,10,20,40,80,150,300,mid-1};
+		int[] neighborSize= {10};//;,2,3,4,5,10,20,40,80,150,300,mid-1};
 		double [] v = new double[neighborSize.length];
 		EmbeddedModeling model= new EmbeddedModeling(data,1,EmbeddedModeling.Norm.MAX);
 		
-		model.setApplyWeight(false);
-		model.setlocalLinearPrediction(true);
+		model.setApplyWeight(true);
+		model.setLocalSlopeOrder(0);
 		v=model.predictivePowerLeavePer(data,M,th,neighborSize);
 		
 		//Plot plt= new Plot("",neighborSize,v);
