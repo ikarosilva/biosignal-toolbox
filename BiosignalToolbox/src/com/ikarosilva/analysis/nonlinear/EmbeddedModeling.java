@@ -43,7 +43,7 @@ public class EmbeddedModeling {
 		return dist;
 	}
 
-	public double[] estimateDimension(double[] threshold, int[] M){
+	public double[] correlationDimension(int[] M, int iterations){
 		/*
 		Assumptions: One of the hardest task is choosing the appropiate range 
 		for the threshold value (ie, the "scaling region"). A value too small
@@ -52,23 +52,34 @@ public class EmbeddedModeling {
 
 		  Moreover, the slope estimation should be really done manually for segmenting the initial transition
 		  from the steady state behaviour (ie, determining the knee-point of the correlation curve).
+
+		  We use the suggestions on Kaplan (pg 354) to deal with the scaling region issue.
 		 */
+		iterations++; //First loop is for th1
 		double[] v= new double[M.length];
-		double[] best;
-		double corr=0;
-		double[] init = { 1, 1}; // a - bx
-		CurveFitter fitter = new CurveFitter(new LevenbergMarquardtOptimizer());
-		for(int m=0;m<M.length;m++){
-			fitter.clearObservations();
-			for(int i=0;i<threshold.length;i++){
-				//System.out.println("th= " + threshold[i]+"\tm= " + M[m]);
-				corr=correlationIntegral(threshold[i],M[m]);
-				if(corr > 0 ) //Can happen if th is too small and/or M too large
-					fitter.addObservedPoint(Math.log(threshold[i]),Math.log(corr));
-			}
-			//Compute optimal coefficients.
-			best = fitter.fit(new PolynomialFunction.Parametric(), init);
-			v[m]=best[1];
+		double th1 = Math.sqrt(General.var(data))/4;
+		double step = 1.5;
+		double[] corr= new double[iterations];
+		
+		//According to Kaplan first threshold should be proportional to noise and the second
+		//one 5x the first
+		double[] best=new double[2];
+		for(int m=0;m<M.length;m++){	
+			for(int i=0;i<iterations;i++)
+				corr[i]=correlationIntegral(th1+th1*i*step,M[m]);
+			
+			//Search for value closest to C(th1)/C(th2) ~ 5
+			best[0]=Double.MAX_VALUE;
+			best[1]=0;
+				for(int i=1;i<iterations;i++){
+					if(Math.abs(corr[i]-corr[0]/5)<best[0]){
+						best[0]=corr[i]-corr[0]/5;
+						best[1]=i;
+					}
+				}
+					
+			v[m]=(Math.log(corr[0])-Math.log(corr[(int)best[1]])) / 
+					(Math.log(th1)-Math.log(th1+th1*step*best[1]));
 		}
 		return v;
 	}
@@ -126,7 +137,7 @@ public class EmbeddedModeling {
 		double[] err=new double[neighborSize.length];
 		for(int i=0;i<neighborSize.length;i++){
 			err[i]=predictivePowerLeaveHalf(timeSeries,M,th,neighborSize[i]);
-			//System.out.println("Dim= " +neighborSize[i] + "-> err= " + err[i]);
+			System.out.println("Dim= " +neighborSize[i] + "-> err= " + err[i]);
 		}
 		return err;
 	}
@@ -138,16 +149,14 @@ public class EmbeddedModeling {
 		 */
 		int n, m;
 		double[] v1= new double[M];
-		double future=0, futureHat;
+		double futureHat;
 		boolean applyWeight=false; //otherwise there will be always be a vector very close biasing results!
-
 
 		//Use the beginning as the training data
 		int N0=Math.round(timeSeries.length/2);
 		setData(Arrays.copyOfRange(timeSeries,0,N0));
 		ArrayList<Double> err= new ArrayList<Double>();
 		err.ensureCapacity(N-N0);
-		Random rnd1= new Random(System.currentTimeMillis());
 		prediction = new double[2][timeSeries.length-1];
 
 		for(n=(N0+(M-1)*tau-1);n<timeSeries.length-1;n=n+step){
@@ -157,14 +166,13 @@ public class EmbeddedModeling {
 				v1[m]=timeSeries[n-(M-1-m)*tau];
 				//System.out.println( m + " -> " + v1[m] );
 			}
-			future=timeSeries[n+1]; 
 			//Get the prediction
 			try {
 				//System.out.println("Future is= x=" + timeSeries[n] + " , y="  + future );
 				futureHat=predict(v1,th,neighborSize,applyWeight);
 				prediction[0][n]=v1[M-1];
 				prediction[1][n]=futureHat;
-				err.add((future-futureHat)*(future-futureHat));
+				err.add((timeSeries[n+1]-futureHat)*(timeSeries[n+1]-futureHat));
 			} catch (Exception e) {
 				prediction[0][n]=Double.NaN;
 				prediction[1][n]=Double.NaN;

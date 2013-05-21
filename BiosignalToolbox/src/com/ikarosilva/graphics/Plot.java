@@ -111,7 +111,7 @@ import org.jfree.ui.RefineryUtilities;
         private static XYDataset createDataset(double[] x,double[] y) {
         	XYSeriesCollection result = new XYSeriesCollection();
         	XYSeries series = new XYSeries(1);
-    		for(int n=0;n<x.length-1;n++){
+    		for(int n=0;n<x.length;n++){
     			if(x[n] !=0)
     			series.add(x[n],y[n]);
     		}
@@ -124,7 +124,7 @@ import org.jfree.ui.RefineryUtilities;
         	XYSeriesCollection result = new XYSeriesCollection();
         	XYSeries series = new XYSeries(1);
         	XYSeries series2 = new XYSeries(2);
-    		for(int n=0;n<x.length-1;n++){
+    		for(int n=0;n<x.length;n++){
     			series.add(x[n],y[n]);
     			series.add(x[n],z[n]);
     		}
