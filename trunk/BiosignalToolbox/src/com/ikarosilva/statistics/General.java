@@ -40,13 +40,11 @@ public class General {
 	}
 	
 	public static double var(double[] x){
-		double mx=0, sigma=0;
-		for(int n=0;n<x.length;n++)
-			mx+=x[n];
-		mx=mx/x.length;
+		double sigma=0;
+		double mx=General.mean(x);
 		for(int n=0;n<x.length;n++)
 			sigma+=(x[n]-mx)*(x[n]-mx);
-		return sigma/x.length;
+		return (double) sigma/(x.length-1);
 	}
 
 	public static double corrcoeff(double[] x, double[] y) throws Exception{
@@ -84,8 +82,13 @@ public class General {
 	
 	public static double mean(double[] x){
 		double mx=0;
-		for(int n=0;n<x.length;n++)
-			mx=(n*mx + x[n])/(n+1);
+		double count=0;
+		for(int n=0;n<x.length;n++){
+			if(Double.valueOf(x[n])!= Double.NaN){
+				mx=(count*mx + x[n])/(count+1);
+				count++;
+			}
+		}
 		return mx;
 	}
 	
