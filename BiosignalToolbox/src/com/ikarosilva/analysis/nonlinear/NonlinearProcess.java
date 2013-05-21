@@ -170,29 +170,28 @@ public class NonlinearProcess {
 	
 	public static void main(String[] args) {
 		int N=1000;
-		double[] data= modelFour(N);
+		int mid=(int)Math.round(N/2);
+		double[] data= modelFive(N);
 		double th=Double.MAX_VALUE;
 		int M=1; //Embedding Dimension
-		int[] neighborSize= {80};//1,2,3,4,5,10,20,40,62,80,90};
+		int[] neighborSize= {1,2,3,4,5,10,20,40,80,150,300,mid-1};
 		double [] v = new double[neighborSize.length];
-		EmbeddedModeling model= new EmbeddedModeling(data,1,EmbeddedModeling.Norm.EUCLIDEAN);
+		EmbeddedModeling model= new EmbeddedModeling(data,1,EmbeddedModeling.Norm.MAX);
 		
-		
+		model.setApplyWeight(true);
 		//General.demean(data);
 		v=model.predictivePowerLeaveHalf(data,M,th,neighborSize);
 		
-		//Plot plt= new Plot("",neighborSize,v);
+		Plot plt= new Plot("",neighborSize,v);
 		//Plot plt2= new Plot("",data);
-		double[][] p=model.prediction;
-		int mid=(int)Math.round(N/2);
+		//double[][] p=model.prediction;
 		
-		
-		
+		/*
 		ScatterPlot sct = new
                   ScatterPlot("",Arrays.copyOfRange(data,0,mid-2),Arrays.copyOfRange(data,1,mid-1)
                 		  ,p[0],p[1],
                 		  Arrays.copyOfRange(data,mid,N-2),Arrays.copyOfRange(data,mid+1,N-1));
-		
+		*/
 		System.out.println("done!");
 		
 	}

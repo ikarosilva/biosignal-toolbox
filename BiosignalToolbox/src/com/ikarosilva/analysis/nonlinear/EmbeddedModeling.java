@@ -2,12 +2,6 @@ package com.ikarosilva.analysis.nonlinear;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
-
-import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
-import org.apache.commons.math3.optimization.fitting.CurveFitter;
-import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
-
 import com.ikarosilva.statistics.General;
 
 public class EmbeddedModeling {
@@ -24,15 +18,27 @@ public class EmbeddedModeling {
 	private double[] data;
 	private int N;
 	public double[][] prediction;
-
+	public boolean localLinearPrediction;
+	public double lypunovExponent;
+	public boolean applyWeight;
+	
 	public EmbeddedModeling(double[] data,int tau, Norm norm){
 		this.tau=tau;
 		this.norm=norm;
 		this.data=data;
 		N=data.length;
 		step=1;//Step size between state vectors (in sample) in order to avoid local similarities
+		localLinearPrediction=true;
+		applyWeight=false;
 	}
-
+	
+	public void setApplyWeight(boolean set){
+		applyWeight=set;
+	}
+	
+	public void setlocalLinearPrediction(boolean set){
+		localLinearPrediction=set;
+	}
 	public void setData(double[] data){
 		this.data=data;
 		N=data.length;
@@ -137,7 +143,7 @@ public class EmbeddedModeling {
 		double[] err=new double[neighborSize.length];
 		for(int i=0;i<neighborSize.length;i++){
 			err[i]=predictivePowerLeaveHalf(timeSeries,M,th,neighborSize[i]);
-			System.out.println("Dim= " +neighborSize[i] + "-> err= " + err[i]);
+			//System.out.println("Dim= " +neighborSize[i] + "-> err= " + err[i]);
 		}
 		return err;
 	}
@@ -149,9 +155,7 @@ public class EmbeddedModeling {
 		 */
 		int n, m;
 		double[] v1= new double[M];
-		double futureHat;
-		boolean applyWeight=false; //otherwise there will be always be a vector very close biasing results!
-
+		lypunovExponent=1;
 		//Use the beginning as the training data
 		int N0=Math.round(timeSeries.length/2);
 		setData(Arrays.copyOfRange(timeSeries,0,N0));
@@ -161,38 +165,29 @@ public class EmbeddedModeling {
 
 		for(n=(N0+(M-1)*tau-1);n<timeSeries.length-1;n=n+step){
 			//Get the vector to match and its future value
-			//TODO: check this loop in the leaveOneOut
 			for(m=0;m<M;m++){
 				v1[m]=timeSeries[n-(M-1-m)*tau];
-				//System.out.println( m + " -> " + v1[m] );
 			}
 			//Get the prediction
 			try {
-				//System.out.println("Future is= x=" + timeSeries[n] + " , y="  + future );
-				futureHat=predict(v1,th,neighborSize,applyWeight);
 				prediction[0][n]=v1[M-1];
-				prediction[1][n]=futureHat;
-				err.add((timeSeries[n+1]-futureHat)*(timeSeries[n+1]-futureHat));
+				prediction[1][n]=predict(v1,th,neighborSize);
+				err.add((timeSeries[n+1]-prediction[1][n])
+						*(timeSeries[n+1]-prediction[1][n]));
 			} catch (Exception e) {
 				prediction[0][n]=Double.NaN;
 				prediction[1][n]=Double.NaN;
 				e.printStackTrace();
-				//System.err.println("Non-valid prediction...skipping sample");
 			}
 		}
-		//return ratio of variance
-		//System.out.print("ratio= " + (General.mean(err)/General.var(timeSeries)));
-		//System.out.println("\tErr= " +General.mean(err) + "\tvar= " + 
-		//					General.var(timeSeries));
+		lypunovExponent=Math.pow(lypunovExponent,1/err.size());
 		return General.mean(err)/General.var(timeSeries);
-
 	}
 
 	public double[] predictivePowerLeaveOne(double[] timeSeries,int M, double th, int[] neighborSize){
 		double[] err=new double[neighborSize.length];
 		for(int i=0;i<neighborSize.length;i++){
 			err[i]=predictivePowerLeaveOne(timeSeries,M,th,neighborSize[i]);
-			//System.out.println("Dim= " +neighborSize[i] + "-> err= " + err[i]);
 		}
 		return err;
 	}
@@ -206,7 +201,6 @@ public class EmbeddedModeling {
 		double[] tmpData=new double[timeSeries.length-1];
 		double[] v1= new double[M];
 		double future=0, futureHat;
-		boolean applyWeight=false; //otherwise there will be always be a vector very close biasing results!
 		ArrayList<Double> err= new ArrayList<Double>();
 		err.ensureCapacity(timeSeries.length);
 
@@ -226,7 +220,7 @@ public class EmbeddedModeling {
 
 			//Get the prediction
 			try {
-				futureHat=predict(v1,th,neighborSize,applyWeight);
+				futureHat=predict(v1,th,neighborSize);
 				//System.out.println(future +" , "+ futureHat);
 				err.add((future-futureHat)*(future-futureHat));
 			} catch (Exception e) {
@@ -241,7 +235,7 @@ public class EmbeddedModeling {
 
 	}
 
-	public double predict(double[] x, double th, int neighborSize, boolean applyWeight) throws Exception{
+	public double predict(double[] x, double th, int neighborSize) throws Exception{
 		//Find history that matches current state and average them to find the future
 		//with neighborhood limit of neighborSize
 		double y= 0, dist;
@@ -252,15 +246,11 @@ public class EmbeddedModeling {
 		bufferSize=(bufferSize > neighborSize) ? bufferSize:neighborSize;
 		double[][] neighboor= new double[bufferSize][2]; //First column is dist, second is future index
 		double max=Double.MIN_VALUE;
-		int maxInd=0;
+		int maxInd=0, index;
 		int endPoint=(N-1) - (M-1)*tau;
-
-		/*
-		System.out.println("Training data: ");
-		for(n=0;n<data.length;n++)
-			System.out.print(data[n]+ " , ");
-		System.out.println("");
-		 */
+		double intercept=0, slope=0, center=0;
+		
+		
 		if(neighborSize >= N)
 			throw new Exception("Neighboor size =" + neighborSize +" but data size is only = " + N);
 
@@ -271,7 +261,6 @@ public class EmbeddedModeling {
 			}
 			dist=getDistance(x,v1);	
 			//If within tolerance add to the neighboor hood
-			//System.out.println("dist= " + dist + "\tth= " + th);
 			if(dist<th){
 				if(count<bufferSize){
 					neighboor[count][0]=dist;
@@ -325,41 +314,32 @@ public class EmbeddedModeling {
 			//Scale so that weights sum to one apply the weighted averaging 
 			for(n=0;n<count;n++){
 				weights[n]=weights[n]/sumWeight;
-				y+= weights[n]*neighboor[n][1];
+				index=(int) neighboor[n][1];
+				center+= weights[n]*data[index-1];
+				intercept+=weights[n]*data[index];
 			}			
 		}else{
 			//Get average over the neighborhood
+			//System.out.println("\tAveraging: " + count + " points");
 			for(n=0;n<count;n++){
-				//System.out.println("\tAveraging: x= " + data[(int) neighboor[n][1]-1]
-				//		+" , y=" +data[(int) neighboor[n][1]]);
-				y=(n*y + data[(int) neighboor[n][1]])/(n+1);
-
+				index=(int) neighboor[n][1];
+				center=(n*center + data[index-1])/(n+1);
+				intercept=(n*intercept + data[index])/(n+1);
+				
 			}
 		}
+		slope=intercept-center;
+		lypunovExponent=lypunovExponent*(slope);
+		if(localLinearPrediction){
+			y=intercept+slope*(x[M-1]-center);
+		}else{
+			y=intercept;
+		}
+			
 		return y;
 	}
 
-	public double predict(double[] x, double th) throws Exception{
-		//Find history that matches current state and average them to find the future
-		//without and neighborhood limit
-		double y= 0, dist;
-		int n, m, count=0; 
-		int M=x.length;
-		double[] v1=new double[M];
-
-		for(n=0;n<N-1;n=n+step){
-			for(m=0;m<M;m++)
-				v1[m]=data[n+m*tau];
-			dist=getDistance(x,v1);	
-			//If within tolerance get future value and est recursive mean
-			if(dist<th){
-				count++;
-				y=((count-1)*y + data[n+m*tau+1])/count;
-			}
-		}
-		return y;
-	}
-
+	
 	public double falseNeighbour(double threshold,double sigma, int M, double th){
 		/*
 		Calculates the number of false neighbors for this model
@@ -395,9 +375,5 @@ public class EmbeddedModeling {
 		}
 		return (double) num/den;	
 	}
-	public static void main(String[] args) {
-		//TODO Auto-generated method stub
-
-	}
-
+	
 }
