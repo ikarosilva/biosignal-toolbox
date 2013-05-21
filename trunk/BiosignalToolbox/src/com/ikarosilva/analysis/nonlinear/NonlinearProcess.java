@@ -3,6 +3,7 @@ package com.ikarosilva.analysis.nonlinear;
 
 import java.util.Random;
 import com.ikarosilva.graphics.Plot;
+import com.ikarosilva.statistics.General;
 
 public class NonlinearProcess {
 
@@ -109,6 +110,13 @@ public class NonlinearProcess {
 		return data;
 	}
 	
+	public static double[] whiteNoise(int N){
+		double[] x=new double[N];
+		Random rnd=new Random();
+		for(int i=0;i<N;i++)
+			x[i]=rnd.nextGaussian();
+		return x;
+	}
 	public static double[] bloodCell(int N){
 		double[] data=new double[N];
 		double dx=0,x=10,y=0.1, dy=0,dt=0.001;
@@ -159,20 +167,20 @@ public class NonlinearProcess {
 
 	
 	public static void main(String[] args) {
-		int N=100;
-		double[] data= modelOne(N);
-		double th=1;
+		int N=500;
+		double[] data= modelFive(N);
+		double th=General.var(data)/10;
 		int M=1;
 		int[] neighborSize= {1,2,3,4,5,6,7,8,9,10,
-								12,15,20,25,30,35,40,45,
-								50,55,60,65,70,75,80};
+							15,20,25,30,35,40,45,
+							50,55,60,65,70,75,80};
 		double [] v = new double[neighborSize.length];
 		
 		EmbeddedModeling model= new EmbeddedModeling(data,1,EmbeddedModeling.Norm.EUCLIDEAN);
 		v=model.predictivePower(data,M,th,neighborSize);
 		
         
-		Plot plt= new Plot("",v);
+		Plot plt= new Plot("",neighborSize,v);
 		System.out.println("done!");
 		
 	}

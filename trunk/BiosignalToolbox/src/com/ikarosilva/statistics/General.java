@@ -2,6 +2,7 @@ package com.ikarosilva.statistics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 
 public class General {
 
@@ -23,12 +24,11 @@ public class General {
 	}
 	
 	public static double[][] sortRows(double[][] x){
-        java.util.Arrays.sort(x, 
-                new java.util.Comparator<double[]>(){
-                    public int compare(double[] a,double[]b){
-                        return (int) (a[1]-b[1]);
-                    }
-            });
+		Arrays.sort(x, new Comparator<double[]>() {
+	        public int compare(double[] o1, double[] o2) {
+	            return Double.compare(o1[1], o2[1]);
+	        }
+	    });
         return x;
 	}
 	
@@ -74,11 +74,37 @@ public class General {
 		p=Sxy/Math.sqrt(Sxx*Syy);
 		return p;
 	}
-	/**
-	 * @param args
-	 */
+	
+	public static double mean(ArrayList<Double> x){
+		double[] y=new double[x.size()];
+		for(int n=0;n<x.size();n++)
+			y[n]=x.get(n);
+		return General.mean(y);
+	}
+	
+	public static double mean(double[] x){
+		double mx=0;
+		for(int n=0;n<x.length;n++)
+			mx=(n*mx + x[n])/(n+1);
+		return mx;
+	}
+	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+	    double[][] arr = { { 1, 10, 2.0 }, { 1, 11, 1.2 }, { 1, 12, 1.4 }, };
+	    ;
+	    Arrays.sort(arr, new Comparator<double[]>() {
+	        public int compare(double[] o1, double[] o2) {
+	            return Double.compare(o1[1], o2[1]);
+	        }
+	    });
+
+	    for (int i = 0; i < arr.length; i++) {
+	        for (int j = 0; j < arr.length; j++) {
+	            System.out.print(arr[i][j]);
+	            System.out.print("\t");
+	        }
+	        System.out.println();
+	    }
 
 	}
 

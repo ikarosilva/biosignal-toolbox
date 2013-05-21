@@ -37,6 +37,21 @@ import org.jfree.ui.RefineryUtilities;
             setContentPane(chartPanel);
 		}
         
+        public Plot(String title, int[] xtmp, double[] y) {
+			super(title);
+            this.title=title;
+            double[] x=new double[xtmp.length];
+            for(int i=0;i<xtmp.length;i++)
+            	x[i]=(double) xtmp[i];
+            
+            JPanel chartPanel = createDemoPanel(x,y);
+            chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+            setContentPane(chartPanel);
+            this.pack();
+    		RefineryUtilities.centerFrameOnScreen(this);
+    		this.setVisible(true);
+		}
+        
         public Plot(String title, double[][] x) {
         	super(title);
             this.title=title;
