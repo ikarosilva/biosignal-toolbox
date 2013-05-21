@@ -158,7 +158,7 @@ public class EmbeddedModeling {
 		int n, m;
 		double[] v1= new double[M];
 		//Use the beginning as the training data
-		double percent=0.75; //Percent of the data series to use for training
+		double percent=0.50; //Percent of the data series to use for training
 		
 		int N0=(int)Math.round(timeSeries.length*percent);
 		setData(Arrays.copyOfRange(timeSeries,0,N0));
