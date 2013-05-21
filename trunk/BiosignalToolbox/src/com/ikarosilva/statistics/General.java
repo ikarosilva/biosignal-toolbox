@@ -91,6 +91,11 @@ public class General {
 		}
 		return mx;
 	}
+	public static void demean(double[] data) {
+		double mx=mean(data);
+		for(int n=0;n<data.length;n++)
+			data[n]=data[n]-mx;
+	}
 	
 	public static void main(String[] args) {
 	    double[][] arr = { { 1, 10, 2.0 }, { 1, 11, 1.2 }, { 1, 12, 1.4 }, };
@@ -110,5 +115,7 @@ public class General {
 	    }
 
 	}
+
+	
 
 }

@@ -169,29 +169,30 @@ public class NonlinearProcess {
 
 	
 	public static void main(String[] args) {
-		int N=10;
+		int N=1000;
 		double[] data= modelFour(N);
 		double th=Double.MAX_VALUE;
-		int M=1;
-		int[] neighborSize= {1};//,2,3,4,5,10,20,40,60,80,100};
+		int M=1; //Embedding Dimension
+		int[] neighborSize= {1,2,3,4,5,10,20,40,62,80};
 		double [] v = new double[neighborSize.length];
 		EmbeddedModeling model= new EmbeddedModeling(data,1,EmbeddedModeling.Norm.EUCLIDEAN);
+		
+		General.demean(data);
 		v=model.predictivePowerLeaveHalf(data,M,th,neighborSize);
 		
-		System.out.println("Full data: ");
-		for(int n=0;n<data.length;n++)
-			System.out.print(data[n]+ " , ");
-		System.out.println("");
 		
-		//Plot plt= new Plot("",neighborSize,v);
+		Plot plt= new Plot("",neighborSize,v);
 		//Plot plt2= new Plot("",data);
 		double[][] p=model.prediction;
 		int mid=(int)Math.round(N/2);
-		ScatterPlot sct = new
-                  ScatterPlot("",Arrays.copyOfRange(data,0,8),Arrays.copyOfRange(data,1,9)
-                		  ,p[0],p[1]);//,
-                		  //Arrays.copyOfRange(data,5,8),Arrays.copyOfRange(data,6,9));
 		
+		
+		/*
+		ScatterPlot sct = new
+                  ScatterPlot("",Arrays.copyOfRange(data,0,mid-2),Arrays.copyOfRange(data,1,mid-1)
+                		  ,p[0],p[1],
+                		  Arrays.copyOfRange(data,mid,N-2),Arrays.copyOfRange(data,mid+1,N-1));
+		*/
 		System.out.println("done!");
 		
 	}
