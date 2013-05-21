@@ -139,16 +139,16 @@ public class EmbeddedModeling {
 		return dist;
 	}
 
-	public double[] predictivePowerLeaveHalf(double[] timeSeries,int M, double th, int[] neighborSize){
+	public double[] predictivePowerLeavePer(double[] timeSeries,int M, double th, int[] neighborSize){
 		double[] err=new double[neighborSize.length];
 		for(int i=0;i<neighborSize.length;i++){
-			err[i]=predictivePowerLeaveHalf(timeSeries,M,th,neighborSize[i]);
+			err[i]=predictivePowerLeavePer(timeSeries,M,th,neighborSize[i]);
 			//System.out.println("Dim= " +neighborSize[i] + "-> err= " + err[i]);
 		}
 		return err;
 	}
 
-	public double predictivePowerLeaveHalf(double[] timeSeries,int M, double th,int neighborSize){
+	public double predictivePowerLeavePer(double[] timeSeries,int M, double th,int neighborSize){
 		/*
 		 * Estimates the predictive power of the time series by calculating the 
 		 * error ratio between the embedded model of size M and variance of the time series 
@@ -157,7 +157,9 @@ public class EmbeddedModeling {
 		double[] v1= new double[M];
 		lypunovExponent=1;
 		//Use the beginning as the training data
-		int N0=Math.round(timeSeries.length/2);
+		double percent=0.75; //Percent of the data series to use for training
+		
+		int N0=(int)Math.round(timeSeries.length*percent);
 		setData(Arrays.copyOfRange(timeSeries,0,N0));
 		ArrayList<Double> err= new ArrayList<Double>();
 		err.ensureCapacity(N-N0);
@@ -183,58 +185,7 @@ public class EmbeddedModeling {
 		lypunovExponent=Math.pow(lypunovExponent,1/err.size());
 		return General.mean(err)/General.var(timeSeries);
 	}
-
-	public double[] predictivePowerLeaveOne(double[] timeSeries,int M, double th, int[] neighborSize){
-		double[] err=new double[neighborSize.length];
-		for(int i=0;i<neighborSize.length;i++){
-			err[i]=predictivePowerLeaveOne(timeSeries,M,th,neighborSize[i]);
-		}
-		return err;
-	}
-
-	public double predictivePowerLeaveOne(double[] timeSeries,int M, double th,	int neighborSize){
-		/*
-		 * Estimates the predictive power of the time series by calculating the 
-		 * error ratio between the embedded model of size M and variance of the time series 
-		 */
-		int n, k, m;
-		double[] tmpData=new double[timeSeries.length-1];
-		double[] v1= new double[M];
-		double future=0, futureHat;
-		ArrayList<Double> err= new ArrayList<Double>();
-		err.ensureCapacity(timeSeries.length);
-
-		for(n=(M-1)*tau;n<timeSeries.length-1;n=n+step){
-			//Generate truncate time-series with the value to predict removed
-			for(k=0;k<tmpData.length;k++){
-				if(k != n)
-					tmpData[k]=timeSeries[k];
-			}
-			//Get the vector to match and its future value
-			for(m=n;m>(n-M+1);m--)
-				v1[m]=timeSeries[n-(n-m)*tau];
-			future=timeSeries[n+1];
-
-			//Reset the data
-			this.setData(tmpData);
-
-			//Get the prediction
-			try {
-				futureHat=predict(v1,th,neighborSize);
-				//System.out.println(future +" , "+ futureHat);
-				err.add((future-futureHat)*(future-futureHat));
-			} catch (Exception e) {
-				System.err.println("Non-valid prediction...skipping sample");
-			}
-		}
-
-		//return ratio of mse to signal variance
-		//System.out.println("err= " + General.mean(err));
-		//System.out.println("std= " + General.var(timeSeries));
-		return General.mean(err)/General.var(timeSeries);
-
-	}
-
+	
 	public double predict(double[] x, double th, int neighborSize) throws Exception{
 		//Find history that matches current state and average them to find the future
 		//with neighborhood limit of neighborSize
