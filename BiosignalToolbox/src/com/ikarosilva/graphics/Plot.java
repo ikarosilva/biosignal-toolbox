@@ -52,6 +52,21 @@ import org.jfree.ui.RefineryUtilities;
     		this.setVisible(true);
 		}
         
+        public Plot(String title, int[] xtmp, double[] y, double[] z) {
+			super(title);
+            this.title=title;
+            double[] x=new double[xtmp.length];
+            for(int i=0;i<xtmp.length;i++)
+            	x[i]=(double) xtmp[i];
+            
+            JPanel chartPanel = createDemoPanel(x,y,z);
+            chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+            setContentPane(chartPanel);
+            this.pack();
+    		RefineryUtilities.centerFrameOnScreen(this);
+    		this.setVisible(true);
+		}
+        
         public Plot(String title, double[][] x) {
         	super(title);
             this.title=title;
@@ -103,6 +118,20 @@ import org.jfree.ui.RefineryUtilities;
         	result.addSeries(series);
             return result;
         }
+        
+        private static XYDataset createDataset(double[] x,
+        		double[] y,double[] z) {
+        	XYSeriesCollection result = new XYSeriesCollection();
+        	XYSeries series = new XYSeries(1);
+        	XYSeries series2 = new XYSeries(2);
+    		for(int n=0;n<x.length-1;n++){
+    			series.add(x[n],y[n]);
+    			series.add(x[n],z[n]);
+    		}
+        	result.addSeries(series);
+        	result.addSeries(series2);
+            return result;
+        }
 
         /**
          * Creates a panel for the demo (used by SuperDemo.java).
@@ -113,8 +142,15 @@ import org.jfree.ui.RefineryUtilities;
             JFreeChart chart = createChart(createDataset(timeSeries));
             return new ChartPanel(chart);
         }
+        
         private static JPanel createDemoPanel(double[] x, double[] y) {
             JFreeChart chart = createChart(createDataset(x,y));
+            return new ChartPanel(chart);
+        }
+        
+        private static JPanel createDemoPanel(double[] x, double[] y
+        		, double[] z) {
+            JFreeChart chart = createChart(createDataset(x,y,z));
             return new ChartPanel(chart);
         }
        

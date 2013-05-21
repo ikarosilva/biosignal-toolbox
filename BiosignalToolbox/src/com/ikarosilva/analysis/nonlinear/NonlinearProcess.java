@@ -1,8 +1,10 @@
 package com.ikarosilva.analysis.nonlinear;
 
 
+import java.util.Arrays;
 import java.util.Random;
 import com.ikarosilva.graphics.Plot;
+import com.ikarosilva.graphics.ScatterPlot;
 import com.ikarosilva.statistics.General;
 
 public class NonlinearProcess {
@@ -167,20 +169,21 @@ public class NonlinearProcess {
 
 	
 	public static void main(String[] args) {
-		int N=500;
-		double[] data= modelFive(N);
-		double th=General.var(data)/10;
+		int N=1000;
+		double[] data= modelFour(N);
+		double th=Double.MAX_VALUE;
 		int M=1;
-		int[] neighborSize= {1,2,3,4,5,6,7,8,9,10,
-							15,20,25,30,35,40,45,
-							50,55,60,65,70,75,80};
+		int[] neighborSize= {1,2,3,4,5,10,20,40,60,80,100};
 		double [] v = new double[neighborSize.length];
-		
 		EmbeddedModeling model= new EmbeddedModeling(data,1,EmbeddedModeling.Norm.EUCLIDEAN);
 		v=model.predictivePowerLeaveHalf(data,M,th,neighborSize);
 		
         
 		Plot plt= new Plot("",neighborSize,v);
+		Plot plt2= new Plot("",data);
+		ScatterPlot sct = new
+                  ScatterPlot("",Arrays.copyOfRange(data,0,N-2),
+                                  Arrays.copyOfRange(data,1,N-1));
 		System.out.println("done!");
 		
 	}

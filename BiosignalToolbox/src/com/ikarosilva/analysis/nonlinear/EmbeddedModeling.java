@@ -2,6 +2,7 @@ package com.ikarosilva.analysis.nonlinear;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.optimization.fitting.CurveFitter;
@@ -135,7 +136,7 @@ public class EmbeddedModeling {
 		 * Estimates the predictive power of the time series by calculating the 
 		 * error ratio between the embedded model of size M and variance of the time series 
 		 */
-		int n, k, m;
+		int n, m;
 		double[] v1= new double[M];
 		double future=0, futureHat;
 		boolean applyWeight=false; //otherwise there will be always be a vector very close biasing results!
@@ -145,24 +146,29 @@ public class EmbeddedModeling {
 		this.setData(Arrays.copyOfRange(timeSeries,0,N0));
 		ArrayList<Double> err= new ArrayList<Double>();
 		err.ensureCapacity(N-N0);
-		
+		Random rnd1= new Random(System.currentTimeMillis());
 		for(n=(N0+(M-1)*tau-1);n<timeSeries.length-1;n=n+step){
 			//Get the vector to match and its future value
-			for(m=n;m>(n-M+1);m--)
-				v1[m]=timeSeries[n-(n-m)*tau];
-			future=timeSeries[n+1]; //TODO: check with the leaveOneOut
+			//TODO: check this loop in the leaveOneOut
+			for(m=0;m<M;m++){
+				v1[m]=timeSeries[n-(M-1-m)*tau];
+				//System.out.println( m + " -> " + v1[m] );
+			}
+			future=timeSeries[n+1]; 
 			//Get the prediction
 			try {
 				futureHat=predict(v1,th,neighborSize,applyWeight);
-				//System.err.println(future +" , "+ futureHat);
+				//System.out.println(future +" , "+ futureHat);
 				err.add((future-futureHat)*(future-futureHat));
 			} catch (Exception e) {
-				System.err.println("Non-valid prediction...skipping sample");
+				e.printStackTrace();
+				//System.err.println("Non-valid prediction...skipping sample");
 			}
 		}
 		//return ratio of variance
-		//System.out.println("err= " + General.mean(err));
-		//System.out.println("std= " + General.var(timeSeries));
+		//System.out.print("ratio= " + (General.mean(err)/General.var(timeSeries)));
+		//System.out.println("\tErr= " +General.mean(err) + "\tvar= " + 
+		//					General.var(timeSeries));
 		return General.mean(err)/General.var(timeSeries);
 
 	}
@@ -206,14 +212,14 @@ public class EmbeddedModeling {
 			//Get the prediction
 			try {
 				futureHat=predict(v1,th,neighborSize,applyWeight);
-				//System.err.println(future +" , "+ futureHat);
+				//System.out.println(future +" , "+ futureHat);
 				err.add((future-futureHat)*(future-futureHat));
 			} catch (Exception e) {
 				System.err.println("Non-valid prediction...skipping sample");
 			}
 		}
 
-		//return ratio of variance
+		//return ratio of mse to signal variance
 		//System.out.println("err= " + General.mean(err));
 		//System.out.println("std= " + General.var(timeSeries));
 		return General.mean(err)/General.var(timeSeries);
@@ -234,12 +240,15 @@ public class EmbeddedModeling {
 		int endPoint=(N-1) - (M-1)*tau+step;
 		if(neighborSize > bufferSize)
 			throw new Exception("Neighboorhood size must be smaller than:" + (N/4));
-
 		for(n=0;n<endPoint;n=n+step){
-			for(m=0;m<(M-1);m++)
+			
+			for(m=0;m<M;m++){
 				v1[m]=data[n+m*tau];
+				//System.out.println("v1= " + data[n+m*tau]);
+			}
 			dist=getDistance(x,v1);	
 			//If within tolerance add to the neighboor hood
+			//System.out.println("dist= " + dist + "\tth= " + th);
 			if(dist<th){
 				if(count<bufferSize){
 					neighboor[count][0]=dist;
@@ -255,8 +264,6 @@ public class EmbeddedModeling {
 					count++;
 				}else if(dist<max){
 					//Buffer is full but current value is better than what is on the buffer
-					//System.out.println((n+(M-1)*tau) + "\t"
-					//+ data.length + "\t" + neighboor.length);
 					neighboor[maxInd][0]=dist;
 					neighboor[maxInd][1]=data[n+(M-1)*tau];
 					//Recalculate the max
@@ -272,11 +279,12 @@ public class EmbeddedModeling {
 			}//End of if(dist<th)
 		}
 
-		if(count < (neighborSize/10))
-			throw new Exception("Neighboorhood size is too small for prediction: " + count);
-		if(count < neighborSize)
+		if(count < (neighborSize/10)){
+			System.err.println("Neighboorhood size is too small for prediction, size= " + count);
+			return Double.NaN;
+		}else if(count < neighborSize)
 			System.err.println("Neighboorhood size is: " + count +" , expected :" + neighborSize);
-
+		
 		int maxVal=0;
 		if(count>neighborSize){
 			maxVal=neighborSize;
