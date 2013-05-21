@@ -122,12 +122,14 @@ public class EmbeddedModeling {
 	}
 
 	public double[] predictivePower(double[] timeSeries,int M, double th, int[] neighborSize){
-			double[] err=new double[neighborSize.length];
-			for(int i=0;i<neighborSize.length;i++)
-				err[i]=predictivePower(timeSeries,M,th,neighborSize[i]);
-			return err;
+		double[] err=new double[neighborSize.length];
+		for(int i=0;i<neighborSize.length;i++){
+			err[i]=predictivePower(timeSeries,M,th,neighborSize[i]);
+			//System.out.println("Dim= " +neighborSize[i] + "-> err= " + err[i]);
+		}
+		return err;
 	}
-	
+
 	public double predictivePower(double[] timeSeries,int M, double th,	int neighborSize){
 		/*
 		 * Estimates the predictive power of the time series by calculating the 
@@ -136,11 +138,11 @@ public class EmbeddedModeling {
 		int n, k, m;
 		double[] tmpData=new double[timeSeries.length-1];
 		double[] v1= new double[M];
-		double future=0;
+		double future=0, futureHat;
 		boolean applyWeight=false; //otherwise there will be always be a vector very close biasing results!
 		ArrayList<Double> err= new ArrayList<Double>();
 		err.ensureCapacity(timeSeries.length);
-		
+
 		for(n=(M-1)*tau;n<timeSeries.length-1;n=n+step){
 			//Generate truncate time-series with the value to predict removed
 			for(k=0;k<tmpData.length;k++){
@@ -148,28 +150,30 @@ public class EmbeddedModeling {
 					tmpData[k]=timeSeries[k];
 			}
 			//Get the vector to match and its future value
-			for(m=n;m>=(n-M+1);m--){
-				System.out.println((n-(n-m)*tau) + "\t" + n);
+			for(m=n;m>(n-M+1);m--)
 				v1[m]=timeSeries[n-(n-m)*tau];
-			}
 			future=timeSeries[n+1];
-			
+
 			//Reset the data
 			this.setData(tmpData);
-			
+
 			//Get the prediction
 			try {
-				err.add(future-this.predict(v1,th,neighborSize,applyWeight));
+				futureHat=predict(v1,th,neighborSize,applyWeight);
+				//System.err.println(future +" , "+ futureHat);
+				err.add((future-futureHat)*(future-futureHat));
 			} catch (Exception e) {
 				System.err.println("Non-valid prediction...skipping sample");
 			}
 		}
-		
+
 		//return ratio of variance
-		return General.var(err)/General.var(timeSeries);
-		
+		//System.out.println("err= " + General.mean(err));
+		//System.out.println("std= " + General.var(timeSeries));
+		return General.mean(err)/General.var(timeSeries);
+
 	}
-	
+
 	public double predict(double[] x, double th, int neighborSize, boolean applyWeight) throws Exception{
 		//Find history that matches current state and average them to find the future
 		//with neighborhood limit of neighborSize
@@ -177,31 +181,38 @@ public class EmbeddedModeling {
 		int n, m,k, count=0; 
 		int M=x.length;
 		double[] v1=new double[M];
-		int bufferSize=Math.round(N/4);
+		int bufferSize=Math.round(N/4)+1;
 		double[][] neighboor= new double[bufferSize][2]; //First column is dist, second is future
 		double max=Double.MIN_VALUE;
 		int maxInd=0;
+		int endPoint=(N-1) - (M-1)*tau+step;
 		if(neighborSize > bufferSize)
 			throw new Exception("Neighboorhood size must be smaller than:" + (N/4));
 
-		for(n=0;n<N-1;n=n+step){
-			for(m=0;m<M;m++)
+		for(n=0;n<endPoint;n=n+step){
+			for(m=0;m<(M-1);m++)
 				v1[m]=data[n+m*tau];
 			dist=getDistance(x,v1);	
 			//If within tolerance add to the neighboor hood
 			if(dist<th){
 				if(count<bufferSize){
 					neighboor[count][0]=dist;
-					neighboor[count][1]=data[n+m*tau+1];
-					if(dist > max){
-						maxInd=count;
-						max=dist;
+					neighboor[count][1]=data[n+(M-1)*tau];
+					if(count ==(bufferSize-1)){
+						for(k=0;k<bufferSize;k++){
+							if(neighboor[k][0] > max){
+								max=neighboor[k][0];
+								maxInd=k;	
+							}
+						}
 					}
 					count++;
 				}else if(dist<max){
 					//Buffer is full but current value is better than what is on the buffer
+					//System.out.println((n+(M-1)*tau) + "\t"
+					//+ data.length + "\t" + neighboor.length);
 					neighboor[maxInd][0]=dist;
-					neighboor[maxInd][1]=data[n+m*tau+1];
+					neighboor[maxInd][1]=data[n+(M-1)*tau];
 					//Recalculate the max
 					max=Double.MIN_VALUE;
 					maxInd=0;
@@ -228,7 +239,7 @@ public class EmbeddedModeling {
 		}else{
 			maxVal=count;
 		}
-		
+
 		if(applyWeight){
 			//Apply weight inversely proportional to distance
 			double[] weights = new double[maxVal];
@@ -247,7 +258,6 @@ public class EmbeddedModeling {
 			for(n=0;n<maxVal;n++)
 				y=(n*y + neighboor[n][1])/(n+1);
 		}
-
 		return y;
 	}
 
