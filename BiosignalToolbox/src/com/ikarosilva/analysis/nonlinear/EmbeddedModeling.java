@@ -6,7 +6,6 @@ import java.util.Random;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.optimization.fitting.CurveFitter;
-import org.apache.commons.math3.optimization.general.GaussNewtonOptimizer;
 import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
 
 import com.ikarosilva.statistics.General;
@@ -24,7 +23,8 @@ public class EmbeddedModeling {
 	private int step;
 	private double[] data;
 	private int N;
-
+	public double[][] prediction;
+	
 	public EmbeddedModeling(double[] data,int tau, Norm norm){
 		this.tau=tau;
 		this.norm=norm;
@@ -140,13 +140,16 @@ public class EmbeddedModeling {
 		double[] v1= new double[M];
 		double future=0, futureHat;
 		boolean applyWeight=false; //otherwise there will be always be a vector very close biasing results!
- 
+		
+		
 		//Use the beginning as the training data
 		int N0=Math.round(timeSeries.length/2);
-		this.setData(Arrays.copyOfRange(timeSeries,0,N0));
+		setData(Arrays.copyOfRange(timeSeries,0,N0));
 		ArrayList<Double> err= new ArrayList<Double>();
 		err.ensureCapacity(N-N0);
 		Random rnd1= new Random(System.currentTimeMillis());
+		prediction = new double[2][timeSeries.length-1];
+		
 		for(n=(N0+(M-1)*tau-1);n<timeSeries.length-1;n=n+step){
 			//Get the vector to match and its future value
 			//TODO: check this loop in the leaveOneOut
@@ -157,10 +160,14 @@ public class EmbeddedModeling {
 			future=timeSeries[n+1]; 
 			//Get the prediction
 			try {
+				System.out.println("Future is= x=" + timeSeries[n] + " , y="  + future );
 				futureHat=predict(v1,th,neighborSize,applyWeight);
-				//System.out.println(future +" , "+ futureHat);
+				prediction[0][n]=v1[M-1];
+				prediction[1][n]=futureHat;
 				err.add((future-futureHat)*(future-futureHat));
 			} catch (Exception e) {
+				prediction[0][n]=Double.NaN;
+				prediction[1][n]=Double.NaN;
 				e.printStackTrace();
 				//System.err.println("Non-valid prediction...skipping sample");
 			}
@@ -234,14 +241,19 @@ public class EmbeddedModeling {
 		int M=x.length;
 		double[] v1=new double[M];
 		int bufferSize=Math.round(N/4)+1;
-		double[][] neighboor= new double[bufferSize][2]; //First column is dist, second is future
+		double[][] neighboor= new double[bufferSize][2]; //First column is dist, second is future index
 		double max=Double.MIN_VALUE;
 		int maxInd=0;
 		int endPoint=(N-1) - (M-1)*tau+step;
 		if(neighborSize > bufferSize)
 			throw new Exception("Neighboorhood size must be smaller than:" + (N/4));
+		
+		System.out.println("Training data: ");
+		for(n=0;n<data.length;n++)
+			System.out.print(data[n]+ " , ");
+		System.out.println("");
+		
 		for(n=0;n<endPoint;n=n+step){
-			
 			for(m=0;m<M;m++){
 				v1[m]=data[n+m*tau];
 				//System.out.println("v1= " + data[n+m*tau]);
@@ -252,7 +264,7 @@ public class EmbeddedModeling {
 			if(dist<th){
 				if(count<bufferSize){
 					neighboor[count][0]=dist;
-					neighboor[count][1]=data[n+(M-1)*tau];
+					neighboor[count][1]=n+(M-1)*tau +1; //future index
 					if(count ==(bufferSize-1)){
 						for(k=0;k<bufferSize;k++){
 							if(neighboor[k][0] > max){
@@ -265,7 +277,7 @@ public class EmbeddedModeling {
 				}else if(dist<max){
 					//Buffer is full but current value is better than what is on the buffer
 					neighboor[maxInd][0]=dist;
-					neighboor[maxInd][1]=data[n+(M-1)*tau];
+					neighboor[maxInd][1]=n+(M-1)*tau+1;//future index
 					//Recalculate the max
 					max=Double.MIN_VALUE;
 					maxInd=0;
@@ -309,8 +321,11 @@ public class EmbeddedModeling {
 			}			
 		}else{
 			//Get average over the neighborhood
-			for(n=0;n<maxVal;n++)
-				y=(n*y + neighboor[n][1])/(n+1);
+			for(n=0;n<maxVal;n++){
+				System.out.println("\tAveraging: x= " + data[(int) neighboor[n][1]-1]
+						+" , y=" +data[(int) neighboor[n][1]]);
+				y=(n*y + data[(int) neighboor[n][1]])/(n+1);
+			}
 		}
 		return y;
 	}

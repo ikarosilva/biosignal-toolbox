@@ -130,6 +130,101 @@ public class ScatterPlot extends ApplicationFrame {
 		this.setVisible(true);
 	}
 
+	public ScatterPlot(String title, double[] x1,double[] y1, double[] x2, double[] y2) {
+
+		super(title);
+		XYSeriesCollection dataset = new XYSeriesCollection();
+		XYSeries series1 = new XYSeries("Series 1");
+		XYSeries series2 = new XYSeries("Series 2");
+		for(int i=0;i<x1.length;i++){
+			series1.add(x1[i],y1[i]);
+		}
+		for(int i=0;i<x2.length;i++){
+			series2.add(x2[i],y2[i]);
+		}
+		
+		dataset.addSeries(series1);
+		dataset.addSeries(series2);
+		JFreeChart chart = ChartFactory.createScatterPlot(
+				title, // title
+				"X", "Y", // axis labels
+				dataset, // dataset
+				PlotOrientation.VERTICAL,
+				true, // legend? yes
+				true, // tooltips? yes
+				false // URLs? no
+		);
+		ChartPanel chartPanel = new ChartPanel(chart);
+		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+		setContentPane(chartPanel);
+		
+		float thickness=(float) 0.25;
+		float length=3;
+		Shape cross = ShapeUtilities.createDiagonalCross(length, thickness);
+		XYItemRenderer renderer = chart.getXYPlot().getRenderer();
+		renderer.setSeriesPaint(0, Color.blue);
+		renderer.setSeriesPaint(1, Color.red);
+		renderer.setSeriesShape(0, cross);
+		
+		
+		this.pack();
+		RefineryUtilities.centerFrameOnScreen(this);
+		this.setVisible(true);
+	}
+
+	public ScatterPlot(String title, double[] x1,double[] y1, double[] x2, double[] y2,
+			double[] x3, double[] y3) {
+
+		super(title);
+		XYSeriesCollection dataset = new XYSeriesCollection();
+		XYSeries series1 = new XYSeries("Series 1");
+		XYSeries series2 = new XYSeries("Series 2");
+		XYSeries series3 = new XYSeries("Series 3");
+		for(int i=0;i<x1.length;i++){
+			series1.add(x1[i],y1[i]);
+		}
+		for(int i=0;i<x2.length;i++){
+			series2.add(x2[i],y2[i]);
+		}
+		for(int i=0;i<x3.length;i++){
+			series3.add(x3[i],y3[i]);
+		}
+		
+		dataset.addSeries(series1);
+		dataset.addSeries(series2);
+		dataset.addSeries(series3);
+		
+		JFreeChart chart = ChartFactory.createScatterPlot(
+				title, // title
+				"X", "Y", // axis labels
+				dataset, // dataset
+				PlotOrientation.VERTICAL,
+				true, // legend? yes
+				true, // tooltips? yes
+				false // URLs? no
+		);
+		ChartPanel chartPanel = new ChartPanel(chart);
+		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+		setContentPane(chartPanel);
+		
+		float thickness=(float) 0.25;
+		float length=3;
+		Shape cross = ShapeUtilities.createDiagonalCross(length, thickness);
+		Shape triangle = ShapeUtilities.createUpTriangle(length);
+		XYItemRenderer renderer = chart.getXYPlot().getRenderer();
+		renderer.setSeriesPaint(0, Color.blue);
+		renderer.setSeriesPaint(1, Color.red);
+		renderer.setSeriesPaint(2, Color.green);
+		renderer.setSeriesShape(0, cross);
+		renderer.setSeriesShape(2, triangle);
+		
+		
+		this.pack();
+		RefineryUtilities.centerFrameOnScreen(this);
+		this.setVisible(true);
+	}
+
+	
 	public ScatterPlot(String title, double[] x,double[] y, double[] z) {
 
 		super(title);

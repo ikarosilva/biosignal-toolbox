@@ -169,21 +169,29 @@ public class NonlinearProcess {
 
 	
 	public static void main(String[] args) {
-		int N=1000;
+		int N=10;
 		double[] data= modelFour(N);
-		double th=General.var(data);//Double.MAX_VALUE;
+		double th=Double.MAX_VALUE;
 		int M=1;
-		int[] neighborSize= {1,2,3,4,5,10,20,40,60,80,100};
+		int[] neighborSize= {1};//,2,3,4,5,10,20,40,60,80,100};
 		double [] v = new double[neighborSize.length];
 		EmbeddedModeling model= new EmbeddedModeling(data,1,EmbeddedModeling.Norm.EUCLIDEAN);
 		v=model.predictivePowerLeaveHalf(data,M,th,neighborSize);
 		
-        
-		Plot plt= new Plot("",neighborSize,v);
-		Plot plt2= new Plot("",data);
+		System.out.println("Full data: ");
+		for(int n=0;n<data.length;n++)
+			System.out.print(data[n]+ " , ");
+		System.out.println("");
+		
+		//Plot plt= new Plot("",neighborSize,v);
+		//Plot plt2= new Plot("",data);
+		double[][] p=model.prediction;
+		int mid=(int)Math.round(N/2);
 		ScatterPlot sct = new
-                  ScatterPlot("",Arrays.copyOfRange(data,0,99),
-                                  Arrays.copyOfRange(data,1,100));
+                  ScatterPlot("",Arrays.copyOfRange(data,0,8),Arrays.copyOfRange(data,1,9)
+                		  ,p[0],p[1]);//,
+                		  //Arrays.copyOfRange(data,5,8),Arrays.copyOfRange(data,6,9));
+		
 		System.out.println("done!");
 		
 	}
