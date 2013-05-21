@@ -177,7 +177,7 @@ public class NonlinearProcess {
 		double [] v = new double[neighborSize.length];
 		
 		EmbeddedModeling model= new EmbeddedModeling(data,1,EmbeddedModeling.Norm.EUCLIDEAN);
-		v=model.predictivePower(data,M,th,neighborSize);
+		v=model.predictivePowerLeaveHalf(data,M,th,neighborSize);
 		
         
 		Plot plt= new Plot("",neighborSize,v);

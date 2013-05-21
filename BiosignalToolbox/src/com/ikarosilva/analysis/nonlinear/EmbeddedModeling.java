@@ -121,16 +121,62 @@ public class EmbeddedModeling {
 		return dist;
 	}
 
-	public double[] predictivePower(double[] timeSeries,int M, double th, int[] neighborSize){
+	public double[] predictivePowerLeaveHalf(double[] timeSeries,int M, double th, int[] neighborSize){
 		double[] err=new double[neighborSize.length];
 		for(int i=0;i<neighborSize.length;i++){
-			err[i]=predictivePower(timeSeries,M,th,neighborSize[i]);
+			err[i]=predictivePowerLeaveHalf(timeSeries,M,th,neighborSize[i]);
+			//System.out.println("Dim= " +neighborSize[i] + "-> err= " + err[i]);
+		}
+		return err;
+	}
+	
+	public double predictivePowerLeaveHalf(double[] timeSeries,int M, double th,int neighborSize){
+		/*
+		 * Estimates the predictive power of the time series by calculating the 
+		 * error ratio between the embedded model of size M and variance of the time series 
+		 */
+		int n, k, m;
+		double[] v1= new double[M];
+		double future=0, futureHat;
+		boolean applyWeight=false; //otherwise there will be always be a vector very close biasing results!
+ 
+		//Use the beginning as the training data
+		int N0=Math.round(timeSeries.length/2);
+		this.setData(Arrays.copyOfRange(timeSeries,0,N0));
+		ArrayList<Double> err= new ArrayList<Double>();
+		err.ensureCapacity(N-N0);
+		
+		for(n=(N0+(M-1)*tau-1);n<timeSeries.length-1;n=n+step){
+			//Get the vector to match and its future value
+			for(m=n;m>(n-M+1);m--)
+				v1[m]=timeSeries[n-(n-m)*tau];
+			future=timeSeries[n+1]; //TODO: check with the leaveOneOut
+			//Get the prediction
+			try {
+				futureHat=predict(v1,th,neighborSize,applyWeight);
+				//System.err.println(future +" , "+ futureHat);
+				err.add((future-futureHat)*(future-futureHat));
+			} catch (Exception e) {
+				System.err.println("Non-valid prediction...skipping sample");
+			}
+		}
+		//return ratio of variance
+		//System.out.println("err= " + General.mean(err));
+		//System.out.println("std= " + General.var(timeSeries));
+		return General.mean(err)/General.var(timeSeries);
+
+	}
+	
+	public double[] predictivePowerLeaveOne(double[] timeSeries,int M, double th, int[] neighborSize){
+		double[] err=new double[neighborSize.length];
+		for(int i=0;i<neighborSize.length;i++){
+			err[i]=predictivePowerLeaveOne(timeSeries,M,th,neighborSize[i]);
 			//System.out.println("Dim= " +neighborSize[i] + "-> err= " + err[i]);
 		}
 		return err;
 	}
 
-	public double predictivePower(double[] timeSeries,int M, double th,	int neighborSize){
+	public double predictivePowerLeaveOne(double[] timeSeries,int M, double th,	int neighborSize){
 		/*
 		 * Estimates the predictive power of the time series by calculating the 
 		 * error ratio between the embedded model of size M and variance of the time series 
