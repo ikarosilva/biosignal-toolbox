@@ -24,7 +24,7 @@ public class EmbeddedModeling {
 	private double[] data;
 	private int N;
 	public double[][] prediction;
-	
+
 	public EmbeddedModeling(double[] data,int tau, Norm norm){
 		this.tau=tau;
 		this.norm=norm;
@@ -130,7 +130,7 @@ public class EmbeddedModeling {
 		}
 		return err;
 	}
-	
+
 	public double predictivePowerLeaveHalf(double[] timeSeries,int M, double th,int neighborSize){
 		/*
 		 * Estimates the predictive power of the time series by calculating the 
@@ -140,8 +140,8 @@ public class EmbeddedModeling {
 		double[] v1= new double[M];
 		double future=0, futureHat;
 		boolean applyWeight=false; //otherwise there will be always be a vector very close biasing results!
-		
-		
+
+
 		//Use the beginning as the training data
 		int N0=Math.round(timeSeries.length/2);
 		setData(Arrays.copyOfRange(timeSeries,0,N0));
@@ -149,7 +149,7 @@ public class EmbeddedModeling {
 		err.ensureCapacity(N-N0);
 		Random rnd1= new Random(System.currentTimeMillis());
 		prediction = new double[2][timeSeries.length-1];
-		
+
 		for(n=(N0+(M-1)*tau-1);n<timeSeries.length-1;n=n+step){
 			//Get the vector to match and its future value
 			//TODO: check this loop in the leaveOneOut
@@ -160,7 +160,7 @@ public class EmbeddedModeling {
 			future=timeSeries[n+1]; 
 			//Get the prediction
 			try {
-				System.out.println("Future is= x=" + timeSeries[n] + " , y="  + future );
+				//System.out.println("Future is= x=" + timeSeries[n] + " , y="  + future );
 				futureHat=predict(v1,th,neighborSize,applyWeight);
 				prediction[0][n]=v1[M-1];
 				prediction[1][n]=futureHat;
@@ -179,7 +179,7 @@ public class EmbeddedModeling {
 		return General.mean(err)/General.var(timeSeries);
 
 	}
-	
+
 	public double[] predictivePowerLeaveOne(double[] timeSeries,int M, double th, int[] neighborSize){
 		double[] err=new double[neighborSize.length];
 		for(int i=0;i<neighborSize.length;i++){
@@ -241,18 +241,21 @@ public class EmbeddedModeling {
 		int M=x.length;
 		double[] v1=new double[M];
 		int bufferSize=Math.round(N/4)+1;
+		bufferSize=(bufferSize > neighborSize) ? bufferSize:neighborSize;
 		double[][] neighboor= new double[bufferSize][2]; //First column is dist, second is future index
 		double max=Double.MIN_VALUE;
 		int maxInd=0;
-		int endPoint=(N-1) - (M-1)*tau+step;
-		if(neighborSize > bufferSize)
-			throw new Exception("Neighboorhood size must be smaller than:" + (N/4));
-		
+		int endPoint=(N-1) - (M-1)*tau;
+
+		/*
 		System.out.println("Training data: ");
 		for(n=0;n<data.length;n++)
 			System.out.print(data[n]+ " , ");
 		System.out.println("");
-		
+		 */
+		if(neighborSize >= N)
+			throw new Exception("Neighboor size =" + neighborSize +" but data size is only = " + N);
+
 		for(n=0;n<endPoint;n=n+step){
 			for(m=0;m<M;m++){
 				v1[m]=data[n+m*tau];
@@ -296,35 +299,33 @@ public class EmbeddedModeling {
 			return Double.NaN;
 		}else if(count < neighborSize)
 			System.err.println("Neighboorhood size is: " + count +" , expected :" + neighborSize);
-		
-		int maxVal=0;
+
 		if(count>neighborSize){
-			maxVal=neighborSize;
+			count=neighborSize;
 			//Sort the array and the the closest neighbors
 			neighboor=General.sortRows(neighboor);
-		}else{
-			maxVal=count;
 		}
 
 		if(applyWeight){
 			//Apply weight inversely proportional to distance
-			double[] weights = new double[maxVal];
+			double[] weights = new double[count];
 			double sumWeight=0;
-			for(n=0;n<maxVal;n++){
+			for(n=0;n<count;n++){
 				weights[n]=1/neighboor[n][0];
 				sumWeight+=weights[n];
 			}
 			//Scale so that weights sum to one apply the weighted averaging 
-			for(n=0;n<maxVal;n++){
+			for(n=0;n<count;n++){
 				weights[n]=weights[n]/sumWeight;
 				y+= weights[n]*neighboor[n][1];
 			}			
 		}else{
 			//Get average over the neighborhood
-			for(n=0;n<maxVal;n++){
-				System.out.println("\tAveraging: x= " + data[(int) neighboor[n][1]-1]
-						+" , y=" +data[(int) neighboor[n][1]]);
+			for(n=0;n<count;n++){
+				//System.out.println("\tAveraging: x= " + data[(int) neighboor[n][1]-1]
+				//		+" , y=" +data[(int) neighboor[n][1]]);
 				y=(n*y + data[(int) neighboor[n][1]])/(n+1);
+
 			}
 		}
 		return y;
