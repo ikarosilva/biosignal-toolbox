@@ -151,6 +151,57 @@ public class NonlinearProcess {
 		return data;
 	}
 	
+	public static double[][] transferEntropyEx1(int N){
+		double[][] data=new double[2][N]; //col 1= x, col2 = y
+		double[] sx=new double[3];
+		double bx=0.5, by=0.5,a=1.059;
+		Random gx= new Random(System.currentTimeMillis());
+		Random lx= new Random(System.currentTimeMillis()*5);
+		Random ly= new Random(System.currentTimeMillis()*7);
+		
+		for(int n=0;n<N;n++){
+			sx[2]=sx[1];
+			sx[1]=sx[0];	
+			sx[0]=0*gx.nextGaussian()+10;
+			data[0][n]= sx[0] + General.makeULaplacian(lx.nextDouble(),0, bx);
+			data[1][n]= (a*sx[2])*(a*sx[2]) + 
+					0*General.makeULaplacian(ly.nextDouble(),0, by);
+			//System.out.println(data[0][n]);
+		}
+		
+		return data;
+	}
+	public static double[][] coupledSin(int N){
+		double[][] data=new double[2][N];
+		double xd=0,x=0,y=0, yd=0, 
+			   m=0,u=0.7;
+		for(int n=0;n<N;n++){
+			m=0.4 - (6/(1+ x*x + y*y));
+			yd=y;
+			xd=x;
+			y=u*(xd*Math.sin(m) + yd*Math.cos(m));
+			x=1 + u*(xd*Math.cos(m) - yd*Math.sin(m));
+			data[0][n]=x;
+			data[1][n]=y;
+		}
+		return data;
+	}
+	public static double[][] modulation(int N){
+		double[][] data=new double[2][N];
+		double Fs=10;
+		Random gy= new Random(System.currentTimeMillis());
+		double x=0,y=0,
+				wx=0.05*2*Math.PI/Fs, 
+				wy=1*2*Math.PI/Fs;
+		for(int n=0;n<N;n++){
+			x=10*Math.cos(wx*n);
+			y=0.99*y + gy.nextGaussian();
+			data[0][n]=x;
+			data[1][n]=y*x;
+		}
+		return data;
+	}
+	
 	public static double[] distortedAR(int N) {
 		double[] output= new double[N];
 		double x=0;
