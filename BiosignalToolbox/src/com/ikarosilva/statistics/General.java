@@ -47,6 +47,13 @@ public class General {
 		return General.var(y);
 	}
 	
+	public static double makeULaplacian(double x, double mean, double b){
+		//Make a Laplacian RV from a uniformly distribute [0-1] RV.
+		double y;
+		x=x-0.5;
+		y=mean - b*Math.signum(x)*Math.log(1-2*Math.abs(x));
+		return y;
+	}
 	public static double var(double[] x){
 		double sigma=0;
 		double mx=General.mean(x);
