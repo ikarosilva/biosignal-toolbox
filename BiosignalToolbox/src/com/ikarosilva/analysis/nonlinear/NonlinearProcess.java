@@ -151,6 +151,18 @@ public class NonlinearProcess {
 		return data;
 	}
 	
+	public static double[] distortedAR(int N) {
+		double[] output= new double[N];
+		double x=0;
+		Random rnd1= new Random(System.currentTimeMillis());
+		for(int n=0;n<N;n++){
+			x=0.99*x+rnd1.nextGaussian();
+			output[n]=Math.pow(x,3);
+		}
+		return output;
+
+	}
+	
 	public static double[] Conway(int N) {
 		double[] output= new double[N];
 		int[] a = new int[N];
@@ -171,7 +183,7 @@ public class NonlinearProcess {
 	public static void main(String[] args) {
 		int N=1000;
 		int mid=(int)Math.round(N/2);
-		double[] data= Conway(N);
+		double[] data= distortedAR(N);
 		double th=Double.MAX_VALUE;
 		int M=1; //Embedding Dimension
 		int[] neighborSize= {1};//;,2,3,4,5,10,20,40,80,150,300,mid-1};
@@ -179,11 +191,12 @@ public class NonlinearProcess {
 		EmbeddedModeling model= new EmbeddedModeling(data,1,EmbeddedModeling.Norm.MAX);
 		
 		model.setApplyWeight(true);
-		model.setLocalSlopeOrder(2);
+		model.setLocalSlopeOrder(1);
 		v=model.predictivePowerLeavePer(data,M,th,neighborSize);
 		
 		//Plot plt= new Plot("",neighborSize,v);
 		//Plot plt2= new Plot("",data);
+		
 		double[][] p=model.prediction;
 		
 		
