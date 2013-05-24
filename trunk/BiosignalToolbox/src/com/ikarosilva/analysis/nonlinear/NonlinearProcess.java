@@ -14,12 +14,32 @@ public class NonlinearProcess {
 	public static double[] quadriacticMap(double x0,double R, int N){
 		double[] y=new double[N];
 		y[0]=x0;
-		for(int i=1;i<N;i++)
+		for(int i=1;i<N;i++){
 			y[i]=R*y[i-1]*(1-y[i-1]);
+			System.out.println(y[i]);
+		}
 		return y;
 
 	}
 
+	public static double[] LactateSimulation(int N){
+		double[] y=new double[N];
+		Random rnd=new Random(System.currentTimeMillis());
+		double ltau=-0.5, dHR;//0.25; //liver clears 2mml ~ 10 hours
+		double a=15, c=-0.0004; //growth of lactate under HR
+		double b=-10;
+		double HR=200;
+		double dl, baseline=Math.abs(ltau);
+		y[0]=0;
+		for(int i=1;i<N;i++){
+			dl=ltau*y[i-1];//*(1-y[i-1]);Liver clearance
+			dHR=a/(a+Math.exp(b*(HR-60)));
+			y[i]=dHR;//y[i-1] + dHR;// dl + baseline;
+		}
+		return y;
+
+	}
+	
 	public static double[] BrownianMotion(int N){
 		Random rnd=new Random(System.currentTimeMillis());
 		double[] x=new double[N];
@@ -35,6 +55,17 @@ public class NonlinearProcess {
 		return y;
 	}
 
+	public static double[] DCMotor(int N){
+		double[] y=new double[N];
+		double tau=0.5, T=1/100, c, u=1, K=1.9;
+		y[0]=10;
+		for(int i=1;i<N;i++){
+			c=Math.exp(-(T*(i-1))/tau);
+			y[i]=c*y[i-1] + c*K*T*u/tau;
+		}
+		return y;
+	}
+	
 	public static double[] gompertzGrowth(double x0, double k,double a, double Ts, int N){
 		double[] y=new double[N];
 		y[0]=x0;
@@ -195,7 +226,7 @@ public class NonlinearProcess {
 				wy=1*2*Math.PI/Fs;
 		for(int n=0;n<N;n++){
 			x=10*Math.cos(wx*n);
-			y=0.99*y + gy.nextGaussian();
+			y=0.9*y + gy.nextGaussian();
 			data[0][n]=x;
 			data[1][n]=y*x;
 		}
