@@ -7,15 +7,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-class Compute implements Callable<Double> {
-	private int min;
-	private int max;
+final class Compute implements Callable<Double> {
+	private final int min;
+	private final int max;
 	public Compute(int min, int max){
 		this.min=min;
 		this.max=max;
 	}
 	public Double call(){
 		double sum=0.0;
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		for(int i=min;i<max;++i)
 			sum+=Math.sqrt(i);
 		return sum;
@@ -24,18 +30,20 @@ class Compute implements Callable<Double> {
 }
 
 public class RootSummer {
-	private static final int THREADS=4;
-	private static final int N=2000000000;
-	private static final int FUTURES=1000;
+	private static final int THREADS=Runtime.getRuntime().availableProcessors();
+	private static final int N=200000000;
+	private static final int FUTURES=THREADS;
+	private static final int  quotient=N/FUTURES;
+	private static final int  remainder= N%FUTURES;
 
 	public static void main(String[] args){
 		ArrayList<Future<Double>> futures=
 				new ArrayList<Future<Double>>(FUTURES);
 		ExecutorService executor= 
 				Executors.newFixedThreadPool(THREADS);
-		int work = N/ FUTURES;
+		int work = quotient;
 
-		System.out.println("Creating futures...");
+		System.out.println("Creating futures...threads= " + THREADS);
 		long start=System.currentTimeMillis();
 		for(int i=0;i<FUTURES;i++){
 			Callable<Double> summer = 
