@@ -28,7 +28,7 @@ public class MatrixMultiply {
 	
 	public void main(String[] args){
 		int N=3;
-		double[][] a,b,c;
+		double[][] a = null,b = null,c = null;
 		compute[] threads= new compute[N];
 		int quotient=c.length/N;
 		int remainder= c.length%N;
