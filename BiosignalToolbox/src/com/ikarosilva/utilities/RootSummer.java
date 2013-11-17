@@ -30,7 +30,7 @@ final class Compute implements Callable<Double> {
 }
 
 public class RootSummer {
-	private static final int THREADS=Runtime.getRuntime().availableProcessors();
+	private static final int THREADS=1;//Runtime.getRuntime().availableProcessors();
 	private static final int N=200000000;
 	private static final int FUTURES=THREADS;
 	private static final int  quotient=N/FUTURES;
