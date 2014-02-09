@@ -112,6 +112,31 @@ public class General {
 			data[n]=data[n]-mx;
 	}
 	
+	public static double[] minmax(double[] x){
+		double[] R=new double[2];
+		for(int i=0;i<x.length;i++){
+			R[0]=(x[i]<R[0]) ? x[i]:R[0];
+			R[1]=(x[i]>R[1]) ? x[i]:R[1];
+		}
+		return R;
+	}
+	
+	public static int sub2ind(int a1,int a2,int a3, int M){
+		return a1 + a2*M+ a3*M*M ;
+	}
+	public static int sub2ind(int a[],int M){
+		//Assumes squared matrix!!
+		return a[0] + a[1]*M+ a[2]*M*M ;
+	}
+	
+	public static int[] ind2sub(int sub, int M){
+		int[] ind={ sub%M, 
+				    (sub/M)%(M), 
+				    (sub/(M*M))%M
+				   };
+		return ind;
+	}
+	
 	public static void main(String[] args) {
 	    double[][] arr = { { 1, 10, 2.0 }, { 1, 11, 1.2 }, { 1, 12, 1.4 }, };
 	    ;
