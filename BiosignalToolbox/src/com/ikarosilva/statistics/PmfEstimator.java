@@ -96,8 +96,6 @@ public class PmfEstimator {
 		}
 	}
 
-
-
 	public int[] sub2Indices(Integer sub){
 		int[] indices=new int[M];
 		for(int i=0;i<M;i++){
@@ -149,12 +147,12 @@ public class PmfEstimator {
 		pmf.equipartition(data);
 		pmf.printHashMap();
 		//Plot pdf
-		double[][] pmf2D=pmf.toDouble2D();
-		Plot2DPDF demo = new Plot2DPDF(
-				"PDF",pmf2D,1/10);
-		demo.pack();
-		RefineryUtilities.centerFrameOnScreen(demo);
-		demo.setVisible(true);
+		//double[][] pmf2D=pmf.toDouble2D();
+		//Plot2DPDF demo = new Plot2DPDF(
+	//			"PDF",pmf2D,1/10);
+		//demo.pack();
+		//RefineryUtilities.centerFrameOnScreen(demo);
+		//demo.setVisible(true);
 	
 	}
 
