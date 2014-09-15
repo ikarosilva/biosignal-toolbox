@@ -8,7 +8,9 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.ikarosilva.models.ModelFour;
 import com.ikarosilva.models.ModelOne;
+import com.ikarosilva.models.ModelThree;
 
 public class BiosignalToolbox {
 
@@ -25,6 +27,8 @@ public class BiosignalToolbox {
 		options = new Options();
 		options.addOption("h",false, "Display help.");
 		options.addOption("ModelOne",false, "Simulates ModelOne");
+		options.addOption("ModelThree",false, "Simulates ModelThree");
+		options.addOption("ModelFour",false, "Simulates ModelFour (logistic model)");
 	}
 
 	public static void main(String[] args) {
@@ -37,6 +41,10 @@ public class BiosignalToolbox {
 			cmd = parser.parse(options, toolboxArgs);
 			if (cmd.hasOption("ModelOne")) {
 				ModelOne.main(Arrays.copyOfRange(args,1,args.length));
+			}else if (cmd.hasOption("ModelThree")) {
+				ModelThree.main(Arrays.copyOfRange(args,1,args.length));
+			}else if (cmd.hasOption("ModelFour")) {
+				ModelFour.main(Arrays.copyOfRange(args,1,args.length));
 			}else{
 				help();
 			}
