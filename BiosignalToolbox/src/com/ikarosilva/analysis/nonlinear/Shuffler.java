@@ -116,7 +116,7 @@ public class Shuffler {
 
 
 		int N=600;	
-		double[] timeSeries= NonlinearProcess.Conway(N);
+		double[] timeSeries= NonlinearProcess.whiteNoise(N);
 		double[] surrogate=AmplitudeAdjustedPhaseShuffle(timeSeries);
 
 
