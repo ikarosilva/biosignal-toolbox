@@ -54,12 +54,6 @@ public class NonlinearAnalysis {
 	    for(int n=0;n<N;n++){
 	    	data[n]=Math.random();
 	    }
-	    
-	    
-		Plot demo0 = new Plot("Signal",data);
-		demo0.pack();
-		RefineryUtilities.centerFrameOnScreen(demo0);
-		demo0.setVisible(true);
 		
 
 	}

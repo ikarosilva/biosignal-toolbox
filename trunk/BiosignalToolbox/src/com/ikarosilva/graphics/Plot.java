@@ -1,159 +1,88 @@
 
-    package com.ikarosilva.graphics;
+package com.ikarosilva.graphics;
 
-import javax.swing.JPanel;
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartFrame;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.ApplicationFrame;
-import org.jfree.ui.RefineryUtilities;
+import org.jfree.data.xy.DefaultXYDataset;
 
-    public class Plot extends ApplicationFrame {
 
-    	static String title;
-        public Plot(String title, double[] timeSeries) {
-            super(title);
-            this.title=title;
-            JPanel chartPanel = createDemoPanel(timeSeries);
-            chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-            setContentPane(chartPanel);
-    		this.pack();
-    		RefineryUtilities.centerFrameOnScreen(this);
-    		this.setVisible(true);
-        }
-       
-      
-        public Plot(String title, double[] x, double[] y) {
-			super(title);
-            this.title=title;
-            JPanel chartPanel = createDemoPanel(x,y);
-            chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-            setContentPane(chartPanel);
+public class Plot {
+
+	private static Options options = new Options();
+	private DefaultXYDataset dataset;
+	
+	public Plot(double[][] data){
+		dataset = new DefaultXYDataset();
+		dataset.addSeries("data",data);
+
+		// create a chart...
+		JFreeChart chart = ChartFactory.createXYLineChart(
+				"Plot",
+				"X",
+				"Y",
+				dataset
+				);
+		// create and display a frame...
+		ChartFrame frame = new ChartFrame("PlotChart", chart);
+		frame.pack();
+		frame.setVisible(true);
+	}
+	
+	private static void help() {
+		// Print out help for the function
+		HelpFormatter formater = new HelpFormatter();
+		formater.printHelp("PlotTimeSeries",options);
+		System.exit(0);
+	}
+
+	private static void getOptions(){
+		options = new Options();
+		options.addOption("h",false, "Display help.");
+	}
+
+
+	public static void main(String[] args) throws IOException {
+
+		CommandLineParser parser = new BasicParser();
+		CommandLine cmd = null;
+		getOptions();
+		try {
+			cmd = parser.parse(options, args);
+			if (cmd.hasOption("h"))
+				help();
+		} catch (ParseException e) {
+			e.printStackTrace();
+			help();
 		}
-        
-        public Plot(String title, int[] xtmp, double[] y) {
-			super(title);
-            this.title=title;
-            double[] x=new double[xtmp.length];
-            for(int i=0;i<xtmp.length;i++)
-            	x[i]=(double) xtmp[i];
-            
-            JPanel chartPanel = createDemoPanel(x,y);
-            chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-            setContentPane(chartPanel);
-            this.pack();
-    		RefineryUtilities.centerFrameOnScreen(this);
-    		this.setVisible(true);
+		
+		ArrayList<Double> YList = new ArrayList<Double>();
+		BufferedReader is = new BufferedReader(new InputStreamReader(System.in));
+		String line=is.readLine();
+		while( line != null){
+			System.out.println("Read: " + line);
+			YList.add((double) Double.parseDouble(line));
+			line=is.readLine();
 		}
-        
-        public Plot(String title, int[] xtmp, double[] y, double[] z) {
-			super(title);
-            this.title=title;
-            double[] x=new double[xtmp.length];
-            for(int i=0;i<xtmp.length;i++)
-            	x[i]=(double) xtmp[i];
-            
-            JPanel chartPanel = createDemoPanel(x,y,z);
-            chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-            setContentPane(chartPanel);
-            this.pack();
-    		RefineryUtilities.centerFrameOnScreen(this);
-    		this.setVisible(true);
+		System.out.println("Converting...");
+		double[][] data=new double[2][YList.size()];
+		for(int n=0;n<YList.size();n++){
+			data[0][n]=n;
+			data[1][n]=YList.get(n);
 		}
-        
-        public Plot(String title, double[][] x) {
-        	super(title);
-            this.title=title;
-            JPanel chartPanel = createDemoPanel(x[0],x[1]);
-            chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-            setContentPane(chartPanel);
-		}
+		System.out.println("Plotting...");
+		Plot myPlot=new Plot(data);
+	}
 
 
-		private static JFreeChart createChart(XYDataset dataset) {
-            // create the chart...
-            JFreeChart chart = ChartFactory.createXYLineChart(
-                title,       // chart title
-                "X",                      // x axis label
-                "Y",                      // y axis label
-                dataset,                  // data
-                PlotOrientation.VERTICAL, 
-                true,                     // include legend
-                true,                     // tooltips
-                false                     // urls
-            );
-
-            XYPlot plot = (XYPlot) chart.getPlot();
-            plot.getDomainAxis().setLowerMargin(0.0);
-            plot.getDomainAxis().setUpperMargin(0.0);
-            return chart;
-        }
-       
-        private static XYDataset createDataset(double[] timeSeries) {
-        	XYSeriesCollection result = new XYSeriesCollection();
-        	XYSeries series = new XYSeries(1);
-    		for(int n=0;n<timeSeries.length-1;n++){
-    			//System.out.println("n=" +n + " data[n]=" + data[n]);
-    			if(timeSeries[n] !=0)
-    			series.add(n,timeSeries[n]);
-    			//series.add(n,data[n]);
-    		}
-        	result.addSeries(series);
-            return result;
-        }
-        
-        private static XYDataset createDataset(double[] x,double[] y) {
-        	XYSeriesCollection result = new XYSeriesCollection();
-        	XYSeries series = new XYSeries(1);
-    		for(int n=0;n<x.length;n++){
-    			if(x[n] !=0)
-    			series.add(x[n],y[n]);
-    		}
-        	result.addSeries(series);
-            return result;
-        }
-        
-        private static XYDataset createDataset(double[] x,
-        		double[] y,double[] z) {
-        	XYSeriesCollection result = new XYSeriesCollection();
-        	XYSeries series = new XYSeries(1);
-        	XYSeries series2 = new XYSeries(2);
-    		for(int n=0;n<x.length;n++){
-    			series.add(x[n],y[n]);
-    			series.add(x[n],z[n]);
-    		}
-        	result.addSeries(series);
-        	result.addSeries(series2);
-            return result;
-        }
-
-        /**
-         * Creates a panel for the demo (used by SuperDemo.java).
-         *
-         * @return A panel.
-         */
-        private static JPanel createDemoPanel(double[] timeSeries) {
-            JFreeChart chart = createChart(createDataset(timeSeries));
-            return new ChartPanel(chart);
-        }
-        
-        private static JPanel createDemoPanel(double[] x, double[] y) {
-            JFreeChart chart = createChart(createDataset(x,y));
-            return new ChartPanel(chart);
-        }
-        
-        private static JPanel createDemoPanel(double[] x, double[] y
-        		, double[] z) {
-            JFreeChart chart = createChart(createDataset(x,y,z));
-            return new ChartPanel(chart);
-        }
-       
-
-
-    }
+}

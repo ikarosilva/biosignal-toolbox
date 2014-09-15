@@ -119,16 +119,6 @@ public class Shuffler {
 		double[] timeSeries= NonlinearProcess.Conway(N);
 		double[] surrogate=AmplitudeAdjustedPhaseShuffle(timeSeries);
 
-		Plot demo = new Plot("Orginal Time Series",timeSeries);
-		demo.pack();
-		RefineryUtilities.centerFrameOnScreen(demo);
-		demo.setVisible(true);
-
-		Plot demo0 = new Plot("Surrogate Time Series",surrogate);
-		demo0.pack();
-		RefineryUtilities.centerFrameOnScreen(demo0);
-		demo0.setVisible(true);
-
 
 		//Plot Spectrum
 		SpectralPlot demo2 = new SpectralPlot(
