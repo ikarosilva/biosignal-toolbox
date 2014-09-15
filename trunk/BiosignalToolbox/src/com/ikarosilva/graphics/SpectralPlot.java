@@ -114,7 +114,7 @@ import com.ikarosilva.analysis.nonlinear.NonlinearProcess;
     	}
         
         public static void main(String[] args) {
-        	double[] data= NonlinearProcess.Conway(1024);
+        	double[] data= NonlinearProcess.whiteNoise(1024);
         	double Fs=1;
             SpectralPlot demo = new SpectralPlot(
                     "test",data,Fs);

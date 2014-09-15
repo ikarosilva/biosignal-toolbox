@@ -70,17 +70,14 @@ public class Plot {
 		BufferedReader is = new BufferedReader(new InputStreamReader(System.in));
 		String line=is.readLine();
 		while( line != null){
-			System.out.println("Read: " + line);
 			YList.add((double) Double.parseDouble(line));
 			line=is.readLine();
 		}
-		System.out.println("Converting...");
 		double[][] data=new double[2][YList.size()];
 		for(int n=0;n<YList.size();n++){
 			data[0][n]=n;
 			data[1][n]=YList.get(n);
 		}
-		System.out.println("Plotting...");
 		Plot myPlot=new Plot(data);
 	}
 

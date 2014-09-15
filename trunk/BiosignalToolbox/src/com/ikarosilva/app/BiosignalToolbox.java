@@ -10,6 +10,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.ikarosilva.graphics.Plot;
+import com.ikarosilva.models.Conway;
 import com.ikarosilva.models.ModelFour;
 import com.ikarosilva.models.ModelOne;
 import com.ikarosilva.models.ModelThree;
@@ -31,6 +32,7 @@ public class BiosignalToolbox {
 		options.addOption("ModelOne",false, "Simulates ModelOne");
 		options.addOption("ModelThree",false, "Simulates ModelThree");
 		options.addOption("ModelFour",false, "Simulates ModelFour (logistic model)");
+		options.addOption("Conway",false, "Generates the Conway fractal Series");
 		options.addOption("Plot",false, "Plots streaming data");
 	}
 
@@ -48,6 +50,8 @@ public class BiosignalToolbox {
 				ModelThree.main(Arrays.copyOfRange(args,1,args.length));
 			}else if (cmd.hasOption("ModelFour")) {
 				ModelFour.main(Arrays.copyOfRange(args,1,args.length));
+			}else if (cmd.hasOption("Conway")) {
+				Conway.main(Arrays.copyOfRange(args,1,args.length));
 			}else if (cmd.hasOption("Plot")) {
 				Plot.main(Arrays.copyOfRange(args,1,args.length));
 			}else{
