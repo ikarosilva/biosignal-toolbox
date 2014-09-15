@@ -29,7 +29,6 @@ public class TransferEntropy {
 		//Plot plt= new Plot("",neighborSize,v);
 		Plot plt2= new Plot("",data[1]);
 		*/
-		Plot plt3= new Plot("",data);
 		
 		//double[][] p=model.prediction;
 		//RecurrencePlot.plotDim(data[1],M);
