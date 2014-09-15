@@ -9,7 +9,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.ikarosilva.models.ModelOne;
-public class Main {
+
+public class BiosignalToolbox {
 
 	private static Options options = new Options();
 
@@ -32,16 +33,14 @@ public class Main {
 
 		getOptions();
 		String[] toolboxArgs={args[0]};
-		System.err.println(toolboxArgs[0]);
 		try {
 			cmd = parser.parse(options, toolboxArgs);
-			if (cmd.hasOption("h"))
-				help();
 			if (cmd.hasOption("ModelOne")) {
-				ModelOne.main(args);
+				ModelOne.main(Arrays.copyOfRange(args,1,args.length));
+			}else{
+				help();
 			}
 		} catch (ParseException e) {
-			System.err.println("Error:");
 			e.printStackTrace();
 			help();
 		}	
