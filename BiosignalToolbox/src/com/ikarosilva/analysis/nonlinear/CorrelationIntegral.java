@@ -17,45 +17,54 @@ public class CorrelationIntegral {
 
 	private static Options options = new Options();
 	private int timeLag;
-	private double[] threshold;
 	private int dim;
 	private int stepSize;
 	private double[] data;
-	private double[] err;
+	private ArrayList<Double> err;
 	static int defaultStep=1, errN;
 	static int defaultLag=2;
 	static double[] defaultTh={0.02, 0.01, 0.2, 0.3, 0.4,0.5};
 	static int defaultDim=2;
-    
-	public CorrelationIntegral(int lag,double[] th,int d,int step,double[] data){
+
+	public CorrelationIntegral(int lag,int d,int step,double[] data){
 		timeLag=lag;
-		threshold=th;
 		dim=d;
 		stepSize=step;
 		this.data=data;
 		int vectorSpan=dim*stepSize;
-	    int lastPoint=data.length-vectorSpan;
-	    errN=(lastPoint-lag)/step;
-	    err=new double[errN];
+		int lastPoint=data.length-vectorSpan;
+		errN=(lastPoint-lag)/step;
+		err=new ArrayList<Double>();
+		err.ensureCapacity(errN);
 	}
 
-	public void getError(){
-		int M=threshold.length;
+	public void getDistance(){
 		int N=data.length;
-		int errInd=0;
-		double[] y = new double[M];
-			for(int i=0;i<N;i++){
-				for(int k=i+timeLag;k<N;k++){
-					double tmpErr=0;
-					for(int z=0;z<(dim*stepSize);z+=stepSize){
-						tmpErr+=Math.abs(data[i+z]-data[k+z]);
-					}
-					err[errInd]=tmpErr;
-					errInd++;
+		int windowN=dim*stepSize;
+		for(int i=N-1;i>=0;i--){
+			for(int k=i-windowN-timeLag;k>=0;k--){
+				double tmpErr=0;
+				for(int z=0;z<windowN;z+=stepSize){
+					System.out.print("[" + i + "," +k+ "," + z +" ]= " + data[i-z]+ " - " + data[k-z]);
+					tmpErr+=Math.abs(data[i-z]-data[k-z]);
 				}
+				err.add(tmpErr);
 			}
+		}
 	}
 
+	public int countRemoveNeighbors(double th){
+		int count=0;
+		for(int i=0;i<err.size();i++){
+			if(err.get(i)<th){
+				count++;
+				err.remove(i);
+			}
+		}
+		return count;
+	}
+	
+	
 
 	private static void help() {
 		// Print out help for the function
@@ -69,6 +78,8 @@ public class CorrelationIntegral {
 		options.addOption("h",false, "Display help.");
 	}
 
+	
+	
 	public static void main(String[] args) throws IOException {
 
 		CommandLineParser parser = new BasicParser();
@@ -107,7 +118,6 @@ public class CorrelationIntegral {
 			}	
 		}
 
-
 		ArrayList<Double> YList = new ArrayList<Double>();
 		BufferedReader is = new BufferedReader(new InputStreamReader(System.in));
 		String line=is.readLine();
@@ -119,7 +129,7 @@ public class CorrelationIntegral {
 		for(int i=0;i<YList.size();i++){
 			data[i]=YList.get(i);
 		}
-		CorrelationIntegral corrInt=new CorrelationIntegral(lag,th,d,step,data);
+		CorrelationIntegral corrInt=new CorrelationIntegral(lag,d,step,data);
 	}
 
 }
