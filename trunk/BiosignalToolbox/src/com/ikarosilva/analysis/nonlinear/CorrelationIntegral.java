@@ -45,7 +45,7 @@ public class CorrelationIntegral {
 			for(int k=i-windowN-timeLag;k>=0;k--){
 				double tmpErr=0;
 				for(int z=0;z<windowN;z+=stepSize){
-					System.out.print("[" + i + "," +k+ "," + z +" ]= " + data[i-z]+ " - " + data[k-z]);
+					System.out.println("[" + i + "," +k+ "," + z +" ]= " + data[i-z]+ " - " + data[k-z]);
 					tmpErr+=Math.abs(data[i-z]-data[k-z]);
 				}
 				err.add(tmpErr);
@@ -82,6 +82,18 @@ public class CorrelationIntegral {
 	
 	public static void main(String[] args) throws IOException {
 
+		int N=5;
+		int lag=0, d=2, step=1;
+		double[] data=new double[N];
+		for(int i=0;i<N;i++){
+			System.out.print(i + " , ");
+			data[i]=i;
+		}
+		System.out.println(" ");
+		CorrelationIntegral corrInt=new CorrelationIntegral(lag,d,step,data);
+		corrInt.getDistance();
+		
+		/*
 		CommandLineParser parser = new BasicParser();
 		CommandLine cmd = null;
 		getOptions();
@@ -130,6 +142,7 @@ public class CorrelationIntegral {
 			data[i]=YList.get(i);
 		}
 		CorrelationIntegral corrInt=new CorrelationIntegral(lag,d,step,data);
+		*/
 	}
 
 }
