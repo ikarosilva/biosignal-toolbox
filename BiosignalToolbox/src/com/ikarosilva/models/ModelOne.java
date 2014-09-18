@@ -18,8 +18,8 @@ public class ModelOne {
 	private double v;
 	private final static double defaultA=4;
 	private final static double defaultp=0.95;
-	private final static double defaultSigma=2;
-	private final static double defaultv=0;
+	private final static double defaultSigma=Math.sqrt(2);
+	private final static double defaultv=Math.sqrt(3);
 	private final static int Ndefault=10;
 	private Random measurementNoise=null;
 	private Random stateNoise=null;
@@ -41,8 +41,8 @@ public class ModelOne {
 	}
 
 	public ModelOne(){
-		A=defaultp;
-		p=defaultA;
+		A=defaultA;
+		p=defaultp;
 		sigma=defaultSigma;
 		v=defaultv;
 	}
