@@ -10,7 +10,7 @@ import org.apache.commons.cli.ParseException;
 public class ModelFour {
 
 	final double u;
-	private double x=0; ;
+	private double x=0.2;
 	private final static double defaultu=4.0;
 	private final static int Ndefault=10;
 	private static Options options = new Options();

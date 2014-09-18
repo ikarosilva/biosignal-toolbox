@@ -13,6 +13,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.math3.stat.descriptive.AggregateSummaryStatistics;
 
+import com.ikarosilva.graphics.BwImage;
 import com.ikarosilva.models.ModelFour;
 import com.ikarosilva.models.ModelOne;
 import com.ikarosilva.statistics.General;
@@ -31,7 +32,6 @@ public class CorrelationIntegral {
 	static int defaultLag=2;
 	static double[] defaultTh={0.02, 0.01, 0.2, 0.3, 0.4,0.5};
 	static int defaultDim=2;
-	private double r1, r2;
 
 	public CorrelationIntegral(int lag,int d,int step,double[] data){
 		timeLag=lag;
@@ -52,7 +52,7 @@ public class CorrelationIntegral {
 			for(int k=i-(windowN-1)-timeLag;k>=windowN-1;k--){
 				double tmpErr=0;
 				for(int z=0;z<windowN;z+=stepSize){
-					System.out.println("[" + i + "," +k+ "," + z +" ]= " + data[i-z]+ " - " + data[k-z]);
+					//System.out.println("[" + i + "," +k+ "," + z +" ]= " + data[i-z]+ " - " + data[k-z]);
 					tmpErr+=Math.abs(data[i-z]-data[k-z]);
 				}
 				err.add(tmpErr);
@@ -73,8 +73,8 @@ public class CorrelationIntegral {
 		return count;
 	}
 
-	public void setr1(){
-		r1=Math.sqrt(General.var(data))/4.0;
+	public double getr1(){
+		return Math.sqrt(General.var(data))/4.0;
 	}
 
 
@@ -94,15 +94,20 @@ public class CorrelationIntegral {
 
 	public static void main(String[] args) throws IOException {
 
-		int N=10;
+		int N=50;
 		int lag=1, d=2, step=1;
 		ModelOne model=new ModelOne();
 		model.setN(N);
-		boolean remove=false;
 		double[] data=model.sim();
+		for(int i=0;i<data.length;i++)
+			System.out.println(data[i]);
+		boolean remove=false;
 		CorrelationIntegral corrInt=new CorrelationIntegral(lag,d,step,data);
 		corrInt.getDistance();
-		System.out.println(corrInt.countNeighbors(0.05,remove));
+		double r1=corrInt.getr1();
+		System.out.println("r1=" + r1);
+		System.out.println(corrInt.countNeighbors(r1,remove));
+		
 		/*
 		CommandLineParser parser = new BasicParser();
 		CommandLine cmd = null;
