@@ -1,4 +1,4 @@
-package com.ikarosilva.kalman;
+package com.ikarosilva.statistics;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,14 +25,15 @@ public class MindReader {
 		System.exit(0);
 	}
 
+
 	private static void getOptions(){
 		options = new Options();
 		options.addOption("h",false, "Display help.");
 	}
-	
+
 	private static int randomGuess(){
-		 int x=(Math.random()>0.5) ? 1:0;
-		 return x;
+		int x=(Math.random()>0.5) ? 1:0;
+		return x;
 	}
 	public static void main(String[] args) throws IOException {
 
@@ -47,10 +48,7 @@ public class MindReader {
 			e.printStackTrace();
 			help();
 		}
-		
-		Scanner sc= new Scanner(System.in);
-		System.out.print("Guess 1 or 0 (enter \"2\" to quit): ");
-		int answer=sc.nextInt();
+
 		/*
 		  Register map
 		  1 - win, same, win
@@ -61,30 +59,51 @@ public class MindReader {
 		  6 - loose, same, loose
 		  7 - loose, different, win
 		  8 - loose, different, loose 
-		 
-		*/
-		int[] behavior=new int[8]; //0-same, 1-different
-		int[] isRepeat=new int[8];
-		int[] oldAnswer=new int[4];
-		int prediction=randomGuess(), playerWon, ind=0, oldResult=0, runs=0, isDifferent;
-		int isSame;
+
+		 */
+		Scanner sc= new Scanner(System.in);
+		System.out.print("Guess 1 or 0 (enter \"2\" to quit): ");
+		int[] register=new int[8]; //0-same, 1-different
+		boolean[] isRepeat=new boolean[8];
+		int[] guess=new int[8];
+		int prediction=randomGuess(), answer1=0, answer2=0, result1=0, result2=0, ind=0, runs=0;
+		int isSame=0;
+
 		double score=0;
 		while(true){
+			//Update score and display to user
 			runs++;
 			System.out.print("Mind Reader: " + prediction +
-					" , you: "+ answer + "\t,");
-			playerWon=(prediction==answer) ? 1:0;
-			ind=oldResult + 4*playerWon;
-			isSame=(oldAnswer[ind]==answer) ? 1:0;
-			
-			isDifferent=(behavior[ind]==ind) ? 1:0;
-			behavior[ind]=(behavior[ind]==answer)
-					
+					" , you: "+ answer2 + "\t,");
 			System.out.println("Score: "+ (double) score/runs );
 			System.out.print("Guess 1 or 0 (\"2\" to quit): ");
-			answer=sc.nextInt();
-			prediction=randomGuess();
-			if(answer>1){
+
+
+			//Update Model
+			result2=(prediction==answer2) ? 1:0;
+			isSame=(answer2==answer1) ? 1:0;
+			answer1=answer2;
+			ind=result1 + 2*isSame + 4*result2;
+			if(register[ind]==isSame){
+				isRepeat[ind]=true;
+			}
+			register[ind]=isSame;
+			guess[ind]=answer2;
+
+			//Get next prediction 
+			if(isRepeat[ind]){
+				if(register[ind]==1){
+					prediction=guess[ind];
+				}else{
+					prediction=(guess[ind]==1) ? 0:1;
+				}
+			}else{
+				prediction=randomGuess();
+			}
+
+			//Prompt for his guess
+			answer2=sc.nextInt();
+			if(answer2>1){
 				break;
 			}
 		}
@@ -92,5 +111,5 @@ public class MindReader {
 				(double) score/runs + "\t ( " + runs + " runs)");
 		System.exit(0);
 	}
-	
+
 }
