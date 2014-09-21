@@ -14,6 +14,7 @@ import com.ikarosilva.models.Conway;
 import com.ikarosilva.models.ModelFour;
 import com.ikarosilva.models.ModelOne;
 import com.ikarosilva.models.ModelThree;
+import com.ikarosilva.statistics.MindReader;
 
 public class BiosignalToolbox {
 
@@ -34,6 +35,7 @@ public class BiosignalToolbox {
 		options.addOption("ModelFour",false, "Simulates ModelFour (logistic model)");
 		options.addOption("Conway",false, "Generates the Conway fractal Series");
 		options.addOption("Plot",false, "Plots streaming data");
+		options.addOption("MindReader",false, "Shannon's Mind Reading Game");
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -54,6 +56,8 @@ public class BiosignalToolbox {
 				Conway.main(Arrays.copyOfRange(args,1,args.length));
 			}else if (cmd.hasOption("Plot")) {
 				Plot.main(Arrays.copyOfRange(args,1,args.length));
+			}else if (cmd.hasOption("MindReader")) {
+				MindReader.main(Arrays.copyOfRange(args,1,args.length));
 			}else{
 				help();
 			}
