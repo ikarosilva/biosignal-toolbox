@@ -1,11 +1,5 @@
 package com.ikarosilva.statistics;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Queue;
 import java.util.Scanner;
 
 import org.apache.commons.cli.BasicParser;
@@ -15,6 +9,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+
+//Claude Shannon's Mind Reader
 public class MindReader {
 
 	private static Options options = new Options();
@@ -29,6 +25,11 @@ public class MindReader {
 	private static void getOptions(){
 		options = new Options();
 		options.addOption("h",false, "Display help.");
+	}
+
+	public static void clearConsole(){
+		for (int i = 0; i < 50; ++i)
+			System.out.println();
 	}
 
 	private static int randomGuess(){
@@ -61,21 +62,29 @@ public class MindReader {
 		  8 - loose, different, loose 
 
 		 */
-		Scanner sc= new Scanner(System.in);
+		final Scanner sc= new Scanner(System.in);
 		System.out.print("Guess 1 or 0 (enter \"2\" to quit): ");
 		int[] register=new int[8]; //0-same, 1-different
 		boolean[] isRepeat=new boolean[8];
 		int[] guess=new int[8];
-		int prediction=randomGuess(), answer1=0, answer2=0, result1=0, result2=0, ind=0, runs=0;
+		int prediction=randomGuess(), answer1=0, answer2, result1=0, result2=0, ind=0;
 		int isSame=0;
-
-		double score=0;
+		answer2=sc.nextInt();
+		double score=0,runs=0;
 		while(true){
 			//Update score and display to user
 			runs++;
+			clearConsole(); //so user cant cheat based on his history
+			if(prediction==answer2){
+				System.out.println("You LOST:");
+			}else{
+				score=score+1;
+				System.out.println("***You WON!! :");
+			}
+			
 			System.out.print("Mind Reader: " + prediction +
 					" , you: "+ answer2 + "\t,");
-			System.out.println("Score: "+ (double) score/runs );
+			System.out.println("Score: "+  score/runs + " " + score + " " + runs );
 			System.out.print("Guess 1 or 0 (\"2\" to quit): ");
 
 
@@ -109,6 +118,7 @@ public class MindReader {
 		}
 		System.out.print("Game ended! Final Score: "+
 				(double) score/runs + "\t ( " + runs + " runs)");
+		sc.close();
 		System.exit(0);
 	}
 
