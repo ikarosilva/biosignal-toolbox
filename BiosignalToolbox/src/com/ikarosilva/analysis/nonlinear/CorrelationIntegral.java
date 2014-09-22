@@ -96,7 +96,7 @@ public class CorrelationIntegral {
 
 		int N=50;
 		int lag=1, d=2, step=1;
-		ModelOne model=new ModelOne();
+		ModelFour model=new ModelFour();
 		model.setN(N);
 		double[] data=model.sim();
 		for(int i=0;i<data.length;i++)
