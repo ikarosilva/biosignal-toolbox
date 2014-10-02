@@ -5,6 +5,6 @@
 	<classpathentry exported="true" kind="lib" path="/opt/commons-math3-3.3/commons-math3-3.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="/opt/jcommon-1.0.23/jcommon-1.0.23.jar"/>
 	<classpathentry exported="true" kind="lib" path="/opt/jfreechart-1.0.19/lib/jfreechart-1.0.19.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/ikaro/Downloads/commons-cli-1.2/commons-cli-1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="/opt/commons-cli-1.2/commons-cli-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
