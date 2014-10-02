@@ -13,7 +13,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.math3.stat.descriptive.AggregateSummaryStatistics;
 
-import com.ikarosilva.graphics.BwImage;
 import com.ikarosilva.models.ModelFour;
 import com.ikarosilva.models.ModelOne;
 import com.ikarosilva.statistics.General;
