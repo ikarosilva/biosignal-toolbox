@@ -20,7 +20,7 @@ import org.jfree.ui.RefineryUtilities;
 
 public class ScatterSimple extends ApplicationFrame {
 
-	private double[] x, y;
+	private static double[] x, y;
 	
     public ScatterSimple(String s, double[] X, double[] Y) {
         super(s);
@@ -57,7 +57,8 @@ public class ScatterSimple extends ApplicationFrame {
 
     public static void main(String args[]) {
     	
-		ArrayList<Float> YList = new ArrayList<Float>();
+    	ArrayList<Float> XList = new ArrayList<Float>();
+    	ArrayList<Float> YList = new ArrayList<Float>();
 		BufferedReader is = new BufferedReader(new InputStreamReader(System.in));
 		String line = null;
 		try {
@@ -66,8 +67,11 @@ public class ScatterSimple extends ApplicationFrame {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		String[] tmp;
 		while( line != null){
-			YList.add((float) Float.parseFloat(line));
+			tmp=line.split("\\s+");;
+			XList.add((float) Float.parseFloat(tmp[0]));
+			YList.add((float) Float.parseFloat(tmp[1]));
 			try {
 				line=is.readLine();
 			} catch (IOException e) {
@@ -75,10 +79,10 @@ public class ScatterSimple extends ApplicationFrame {
 				e.printStackTrace();
 			}
 		}
-		double[] x=new double[YList.size()];
-		double[] y=new double[YList.size()];
+		x=new double[XList.size()];
+		y=new double[YList.size()];
 		for(int n=0;n<YList.size();n++){
-			x[n]=n;
+			x[n]=XList.get(n);
 			y[n]=YList.get(n);
 		}
 		
