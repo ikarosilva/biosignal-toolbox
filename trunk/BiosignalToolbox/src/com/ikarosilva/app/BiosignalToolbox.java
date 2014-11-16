@@ -7,9 +7,9 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 import com.ikarosilva.graphics.Plot;
+import com.ikarosilva.graphics.ScatterSimple;
 import com.ikarosilva.models.Conway;
 import com.ikarosilva.models.ModelFour;
 import com.ikarosilva.models.ModelOne;
@@ -35,6 +35,7 @@ public class BiosignalToolbox {
 		options.addOption("ModelFour",false, "Simulates ModelFour (logistic model)");
 		options.addOption("Conway",false, "Generates the Conway fractal Series");
 		options.addOption("Plot",false, "Plots streaming data");
+		options.addOption("Scatter",false, "Generates Scatter Plot");
 		options.addOption("MindReader",false, "Shannon's Mind Reading Game");
 	}
 
@@ -56,14 +57,16 @@ public class BiosignalToolbox {
 				Conway.main(Arrays.copyOfRange(args,1,args.length));
 			}else if (cmd.hasOption("Plot")) {
 				Plot.main(Arrays.copyOfRange(args,1,args.length));
+			}else if (cmd.hasOption("Scatter")) {
+				ScatterSimple.main(Arrays.copyOfRange(args,1,args.length));
 			}else if (cmd.hasOption("MindReader")) {
 				MindReader.main(Arrays.copyOfRange(args,1,args.length));
 			}else{
 				help();
 			}
-		} catch (ParseException e) {
+		} catch (org.apache.commons.cli.ParseException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-			help();
 		}	
 	}
 
