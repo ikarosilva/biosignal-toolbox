@@ -31,6 +31,10 @@ import com.ikarosilva.statistics.MindReader;
 
 public class ScatterSimple extends ApplicationFrame {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private static double[] x, y;
 	private static Options options = new Options();
 
@@ -77,7 +81,7 @@ public class ScatterSimple extends ApplicationFrame {
 	private static void getOptions(){
 		options = new Options();
 		options.addOption("h",false, "Display help.");
-		options.addOption("r",true, "Generate recurrence plot with delay");
+		options.addOption("r",true, "Sample delay for recurrence plot");
 	}
 
 	public static void main(String args[]) {
@@ -86,10 +90,10 @@ public class ScatterSimple extends ApplicationFrame {
 		CommandLine cmd = null;
 
 		getOptions();
-		String[] toolboxArgs={args[0]};
 		int delay=0;
 		try {
-			cmd = parser.parse(options, toolboxArgs);
+			cmd = parser.parse(options, args);
+			
 			if (cmd.hasOption("r")) {
 				delay=Integer.valueOf(cmd.getOptionValue("r"));
 			}else{
@@ -126,8 +130,8 @@ public class ScatterSimple extends ApplicationFrame {
 					oldValue.addLast(Float.parseFloat(tmp[0]));
 				}else{
 					currentValue=Float.parseFloat(tmp[0]);
-					XList.add((float) currentValue);
-					YList.add((float) oldValue.pop());
+					YList.add((float) currentValue);
+					XList.add((float) oldValue.pop());
 					oldValue.addLast(currentValue);
 				}
 				counter++;
