@@ -1,0 +1,1 @@
+Personal collection of Java methods for analysis  and processing of physiological signals.
